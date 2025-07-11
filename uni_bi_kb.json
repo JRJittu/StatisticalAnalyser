@@ -1,0 +1,924 @@
+{
+    "statistical_tests": [
+        {
+            "no_of_variable": "univariate",
+            "var_type": "numerical continuous",
+            "descriptive": {
+                "statistics": [
+                    "mean",
+                    "median",
+                    "mode",
+                    "count",
+                    "range",
+                    "variance",
+                    "standard deviation",
+                    "IQR",
+                    "skewness",
+                    "kurtosis"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate skewness and kurtosis to assess symmetry and tail behavior.",
+                    "Step 2: Calculate range and IQR to assess the spread of the data and detect potential outliers.",
+                    "Step 3: If skewness is approximately between -0.5 and 0.5, the data is considered symmetric. In this case, prefer mean and standard deviation.",
+                    "Step 4: If skewness is greater than 0.5 or less than -0.5, or if outliers are detected, prefer median and IQR for robust description.",
+                    "Step 5: Always calculate mode to identify the most frequent value, especially in multimodal distributions."
+                ],
+                "application_criteria": [
+                    "Mean & Standard Deviation: Use when skewness is between -0.5 and 0.5 (symmetric distribution)",
+                    "Median & IQR: Use when skewness > 0.5 or < -0.5, or when outliers are detected",
+                    "Mode: Always calculate, especially important for multimodal distributions"
+                ]
+            },
+            "visualization": {
+                "histogram": "Select if the distribution is approximately symmetric and skewness is low.",
+                "box plot": "Select if outliers or moderate to high skewness are detected.",
+                "density plot": "Select if the sample size is large and smooth distribution estimation is required.",
+                "violin plot": "Select if multimodal distribution or outliers are detected, combining density and spread.",
+                "Q-Q plot": "Select if skewness and kurtosis suggest checking normality visually.",
+                "selection_criteria": {
+                    "histogram": "Use when distribution is approximately symmetric and skewness is low",
+                    "box plot": "Use when outliers or moderate to high skewness are detected",
+                    "density plot": "Use when sample size ≥ 50 for smooth distribution estimation",
+                    "violin plot": "Use when multimodal distribution or outliers are detected",
+                    "Q-Q plot": "Use when checking normality visually (any sample size)"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "one-sample t-test",
+                    "one-sample z-test",
+                    "confidence interval"
+                ],
+                "selection_criteria": [
+                    "step 1: If number of samples less than 30 use t-test else use z-test",
+                    "Step 2: Perform Shapiro-Wilk test first to assess normality.",
+                    "Step 3: If Shapiro-Wilk p-value > 0.05, proceed with one-sample t-test or z-test based on sample size and known/unknown population variance.",
+                    "Step 4: If Shapiro-Wilk p-value <= 0.05, data is not normal. Consider non-parametric alternatives if available.",
+                    "Step 5: Confidence intervals can be used regardless of normality but interpret cautiously if the distribution is highly skewed."
+                ],
+                "application_criteria": {
+                    "one-sample t-test": "Sample size < 30 AND normally distributed data AND population standard deviation unknown",
+                    "one-sample z-test": "Sample size ≥ 30 OR population standard deviation known AND normally distributed data",
+                    "confidence interval": "Can be used regardless of normality but interpret cautiously if highly skewed"
+                }
+            },
+            "priority_tests": [
+                "Shapiro-Wilk test",
+                "Skewness",
+                "Kurtosis",
+                "Range",
+                "Outlier Detection (via IQR or Z-score)"
+            ]
+        },
+        {
+            "no_of_variable": "univariate",
+            "var_type": "numerical discrete",
+            "descriptive": {
+                "statistics": [
+                    "mean",
+                    "median",
+                    "mode",
+                    "range",
+                    "count",
+                    "variance",
+                    "standard deviation",
+                    "frequency distribution",
+                    "Unique values"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate frequency distribution to understand the discrete value patterns.",
+                    "Step 2: Calculate mean, median, and mode to assess central tendency.",
+                    "Step 3: If outliers are present in discrete data, prefer median over mean.",
+                    "Step 4: Mode is particularly important for discrete data as it identifies the most common value.",
+                    "Step 5: Calculate range and standard deviation to assess variability in discrete measurements."
+                ],
+                "application_criteria": [
+                    "Frequency Distribution: Always calculate first to understand discrete patterns",
+                    "Mean, Median, Mode: Calculate all; prefer median if outliers present",
+                    "Range & Standard Deviation: For variability assessment"
+                ]
+            },
+            "visualization": {
+                "bar chart": "Select to display frequency of each discrete value clearly.",
+                "histogram": "Select to show distribution pattern of discrete values when many unique values exist.",
+                "dot plot": "Select for simple display of individual data points when sample size is small.",
+                "pie chart": "Select to show proportion of each category relative to the whole, best when unique values are few.",
+                "application_criteria": {
+                    "bar chart": "Use for clear display of discrete value frequencies when sample size < 15 and number of unique values is manageable.",
+                    "histogram": "Use when many unique discrete values exist, typically > 15.",
+                    "dot plot": "Use when sample size < 30 and the number of unique values is small for simple display.",
+                    "pie chart": "Use when the number of unique values is small, typically < 6, to clearly show proportions. Do not use when too many slices exist."
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "one-sample t-test",
+                    "chi-square goodness of fit",
+                    "Poisson test",
+                    "confidence interval"
+                ],
+                "selection_criteria": [
+                    "Step 1: Determine if you are testing the mean against a known value or testing the distribution pattern.",
+                    "Step 2: Use a one-sample t-test if you are testing the mean of a discrete variable against a known value.",
+                    "Step 3: Use the chi-square goodness of fit test if you are testing whether the data follows an expected discrete distribution.",
+                    "Step 4: Use the Poisson test specifically for count data to test whether it follows a Poisson distribution."
+                ],
+                "application_criteria": {
+                    "one-sample t-test": "Use for testing the mean of the data against a known or hypothesized value.",
+                    "chi-square goodness of fit": "Use when the expected frequency in each category is ≥ 5. It tests whether the data follows an expected discrete distribution.",
+                    "Poisson test": "Use specifically for count data to test whether the observed distribution fits a Poisson distribution.",
+                    "confidence interval": "Can be used regardless of normality but interpret results cautiously if the data is highly skewed."
+                }
+            },
+            "priority_tests": [
+                "Frequency Distribution Analysis",
+                "Count Data Pattern Recognition",
+                "Number of unique values"
+            ]
+        },
+        {
+            "no_of_variable": "univariate",
+            "var_type": "categorical nominal",
+            "descriptive": {
+                "statistics": [
+                    "count",
+                    "frequency",
+                    "mode",
+                    "proportion"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate frequency counts for each category.",
+                    "Step 2: Calculate proportions (percentages) for each category.",
+                    "Step 3: Identify mode as the most common category.",
+                    "Step 4: Assess if categories are roughly equally distributed or if some dominate."
+                ],
+                "application_criteria": [
+                    "Frequency & Proportions: Always calculate",
+                    "Mode: Identify most common category"
+                ]
+            },
+            "visualization": {
+                "bar chart": "Select to compare frequencies across categories effectively.",
+                "pie chart": "Select to show proportional breakdown when number of categories is small (<=5).",
+                "frequency table": "Select for tabular display of counts and percentages.",
+                "application_criteria": {
+                    "bar chart": "Use for comparing frequencies across categories",
+                    "pie chart": "Use only when number of categories are less than 5 for proportional breakdown",
+                    "frequency table": "Use for tabular display"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "chi-square goodness of fit",
+                    "binomial test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Use chi-square goodness of fit if testing whether observed proportions match expected proportions across multiple categories.",
+                    "Step 2: Use binomial test specifically for binary outcomes when testing a single proportion.",
+                    "Step 3: Ensure expected frequencies are >5 for chi-square test validity."
+                ],
+                "application_criteria": {
+                    "chi-square goodness of fit": "Expected frequencies ≥ 5 in each category - Use for testing proportions across multiple categories",
+                    "binomial test": "Use for binary outcomes when testing single proportion"
+                }
+            },
+            "priority_tests": [
+                "Chi-square Goodness of Fit",
+                "Expected Frequency Check",
+                "Proportion Analysis"
+            ]
+        },
+        {
+            "no_of_variable": "univariate",
+            "var_type": "categorical ordinal",
+            "descriptive": {
+                "statistics": [
+                    "count",
+                    "median",
+                    "mode",
+                    "quartiles",
+                    "frequency distribution"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate frequency distribution maintaining the natural order of categories.",
+                    "Step 2: Determine median category as the middle rank in ordered categories.",
+                    "Step 3: Identify mode as the most frequent ordered category.",
+                    "Step 4: Calculate quartiles if meaningful for the ordinal scale."
+                ],
+                "application_criteria": [
+                    "Median & Mode: Primary measures for ordered categories",
+                    "Quartiles: Use if meaningful for the ordinal scale",
+                    "Frequency Distribution: Maintain natural order"
+                ]
+            },
+            "visualization": {
+                "bar chart": "Select to display ordered categories while maintaining sequence.",
+                "ordered bar chart": "Select to emphasize the natural ordering of categories.",
+                "application_criteria": {
+                    "ordered bar chart": "Emphasize natural ordering of categories"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Kolmogorov-Smirnov test",
+                    "runs test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Use Kolmogorov-Smirnov test to assess if data follows expected distribution pattern.",
+                    "Step 2: Use runs test to check for randomness in the ordered sequence.",
+                    "Step 3: Ensure sufficient sample size for meaningful results."
+                ],
+                "application_criteria": {
+                    "Kolmogorov-Smirnov test": "Sample size ≥ 35 recommended - Assess if data follows expected distribution pattern",
+                    "runs test": "Check randomness in ordered sequence"
+                }
+            },
+            "priority_tests": [
+                "Order Pattern Assessment",
+                "Distribution Shape Analysis",
+                "Randomness Testing"
+            ]
+        },
+        {
+            "no_of_variable": "univariate",
+            "var_type": "numerical continuous time series",
+            "descriptive": {
+                "statistics": [
+                    "count",
+                    "mean",
+                    "variance",
+                    "standard deviation",
+                    "trend analysis",
+                    "seasonality detection",
+                    "autocorrelation function (ACF)"
+                ],
+                "selection_criteria": [
+                    "Step 1: Plot the time series to visually assess trend and seasonality.",
+                    "Step 2: Calculate mean and variance to assess stability over time.",
+                    "Step 3: Use ACF to detect autocorrelations which suggest predictable patterns.",
+                    "Step 4: Perform trend analysis to identify increasing or decreasing tendencies.",
+                    "Step 5: Detect seasonality by checking periodic patterns in the data."
+                ],
+                "application_criteria": [
+                    "Mean & Variance: Assess stability over time",
+                    "ACF (Autocorrelation Function): Detect predictable patterns",
+                    "Trend & Seasonality Analysis: Always perform visual assessment first"
+                ]
+            },
+            "visualization": {
+                "time series plot": "Select as the primary plot to visualize trends, seasonality, and outliers over time.",
+                "ACF plot": "Select to check autocorrelation lags which indicate persistence in the time series.",
+                "decomposition plot": "Select to separate trend, seasonality, and residual components visually.",
+                "seasonal subseries plot": "Select to highlight seasonal variations across periods.",
+                "application_criteria": {
+                    "time series plot": "Primary visualization for trends and seasonality",
+                    "ACF plot": "Check autocorrelation lags",
+                    "decomposition plot": "Separate trend, seasonality, and residuals",
+                    "seasonal subseries plot": "Highlight seasonal variations"
+                }
+            },
+            "forecasting": {
+                "tests": [
+                    "ARIMA",
+                    "SARIMA",
+                    "ARMA",
+                    "Simple Exponential Smoothing (SES)",
+                    "Weighted Exponential Smoothing",
+                    "Holt's Linear Trend Method",
+                    "Holt-Winters Method (Triple Exponential Smoothing)",
+                    "Seasonal Decomposition",
+                    "Stationarity Test (ADF Test)"
+                ],
+                "selection_criteria": [
+                    "Step 1: Perform Augmented Dickey-Fuller (ADF) test to check for stationarity.",
+                    "Step 2: If stationary with no seasonality, use ARMA for modeling autoregressive and moving average components.",
+                    "Step 3: If non-stationary with trend but no seasonality, use ARIMA after differencing.",
+                    "Step 4: If both trend and seasonality are present, use SARIMA for seasonal adjustments.",
+                    "Step 5: Use Simple Exponential Smoothing (SES) for stationary series with no trend or seasonality (short-term forecasts).",
+                    "Step 6: Use Weighted Exponential Smoothing when recent observations should have more influence on forecasts (quick response to changes).",
+                    "Step 7: Use Holt's Linear Trend Method for non-seasonal series with a linear trend.",
+                    "Step 8: Use Holt-Winters Method for data with both trend and seasonality for smooth short-to-medium term forecasts.",
+                    "Step 9: Apply Seasonal Decomposition to visualize and separate trend, seasonality, and residuals, often as a pre-processing step."
+                ],
+                "application_criteria": {
+                    "Simple Exponential Smoothing (SES)": "Stationary series with no trend or seasonality - Short-term forecasts (1-3 periods ahead)",
+                    "Holt's Linear Trend": "Non-seasonal series with linear trend",
+                    "Holt-Winters": "Data with both trend and seasonality",
+                    "ARMA": "Stationary series with autocorrelation",
+                    "ARIMA": "Non-stationary series (after differencing to achieve stationarity)",
+                    "SARIMA": "Series with seasonal patterns",
+                    "ADF Test": "Always perform first to check stationarity (p-value < 0.05 indicates stationarity)"
+                }
+            },
+            "priority_tests": [
+                "ADF Test (Stationarity)",
+                "Trend Detection",
+                "Seasonality Detection",
+                "Autocorrelation Check (ACF)"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous time series + numerical continuous time series",
+            "descriptive": {
+                "statistics": [
+                    "cross-correlation function (CCF)",
+                    "trend comparison",
+                    "seasonality alignment",
+                    "lagged correlation analysis"
+                ],
+                "selection_criteria": [
+                    "Step 1: Plot both time series together to compare trends and seasonal patterns.",
+                    "Step 2: Use cross-correlation function (CCF) to assess leading or lagging relationships between series.",
+                    "Step 3: Perform lagged correlation analysis to identify time-dependent influence.",
+                    "Step 4: Check if trends and seasonality of both series are synchronized or independent."
+                ],
+                "application_criteria": [
+                    "Cross-correlation Function (CCF): Lead-lag relationships",
+                    "Trend Comparison: Synchronization assessment",
+                    "Lagged Correlation Analysis: Time-dependent influence"
+                ]
+            },
+            "visualization": {
+                "overlaid time series plot": "Select to visually compare trends and seasonality of both series over time.",
+                "cross-correlation plot": "Select to detect lead-lag relationships between the two time series.",
+                "scatter plot with lagging adjustments": "Select to explore the relationship at various lags visually.",
+                "heatmap of lagged correlations": "Select to summarize correlation strength across multiple lags.",
+                "application_criteria": {
+                    "overlaid time series plot": "Compare trends and seasonality",
+                    "cross-correlation plot": "Detect lead-lag relationships",
+                    "heatmap of lagged correlations": "Summarize across lags"
+                }
+            },
+            "forecasting": {
+                "tests": [
+                    "Vector Autoregression (VAR)",
+                    "Granger Causality Test",
+                    "Cointegration Test",
+                    "Cross-correlation Analysis",
+                    "Multivariate SARIMA (SARIMAX)",
+                    "Multivariate ARIMA",
+                    "Holt-Winters Method (Multivariate Extension)",
+                    "Weighted Exponential Smoothing (Multivariate)"
+                ],
+                "selection_criteria": [
+                    "Step 1: Perform Granger Causality Test to determine if one time series predicts another.",
+                    "Step 2: Conduct Cointegration Test to assess long-term equilibrium relationship between series.",
+                    "Step 3: Apply VAR when both series influence each other over time and are stationary.",
+                    "Step 4: Use cross-correlation to detect significant lagged relationships that can guide forecasting models.",
+                    "Step 5: If both series show seasonal patterns, consider Multivariate SARIMA (SARIMAX) to capture seasonality and cross-influence.",
+                    "Step 6: Use Multivariate ARIMA when dealing with multiple non-seasonal but autocorrelated series.",
+                    "Step 7: Apply Holt-Winters Method (Multivariate) if both trend and seasonality are present across multiple series.",
+                    "Step 8: Use Weighted Exponential Smoothing (Multivariate) when recent values in both series should carry more weight in forecasts."
+                ],
+                "application_criteria": {
+                    "Granger Causality Test": "Minimum 30-50 observations per series - Test if one series predicts another",
+                    "Cointegration Test": "Series length ≥ 50 observations - Assess long-term equilibrium relationship",
+                    "Vector Autoregression (VAR)": "Both series stationary and mutually influential - Minimum 30 observations per variable",
+                    "Multivariate SARIMA": "Both series show seasonal patterns"
+                }
+            },
+            "priority_tests": [
+                "Granger Causality Test",
+                "Cointegration Test",
+                "Stationarity Check (ADF Test) for Both Series",
+                "Cross-correlation Function (CCF)"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous + numerical continuous",
+            "descriptive": {
+                "statistics": [
+                    "Pearson correlation coefficient",
+                    "covariance",
+                    "regression line parameters"
+                ],
+                "selection_criteria": [
+                    "Step 1: Create scatter plot to visually assess linearity of relationship and identify outliers.",
+                    "Step 2: If relationship appears linear, calculate Pearson correlation coefficient.",
+                    "Step 3: Calculate covariance to understand how variables change together in original units.",
+                    "Step 4: Determine regression line parameters (slope and intercept) for predictive modeling.",
+                    "Step 5: Assess strength and direction of linear relationship using correlation coefficient."
+                ],
+                "application_criteria": [
+                    "Pearson Correlation: Use when relationship appears linear in scatter plot",
+                    "Covariance: Understand how variables change together and measure joint variability",
+                    "Regression parameters: Establish predictive relationship between variables"
+                ]
+            },
+            "visualization": {
+                "scatter plot": "Select to visualize relationship pattern between two variables.",
+                "scatter plot with regression line": "Select to visualize linear relationship and trend.",
+                "correlation matrix heatmap": "Select when displaying multiple correlations simultaneously or for correlation strength visualization.",
+                "residual plot": "Select to check regression assumptions and validate linear model.",
+                "application_criteria": {
+                    "scatter plot": "Primary visualization for relationship assessment and continuous bivariate data",
+                    "regression line": "Shows linear trend and prediction capability",
+                    "residual plot": "Validates linear model assumptions and checks for patterns in residuals"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Pearson product moment correlation",
+                    "Spearman rank correlation",
+                    "simple linear regression"
+                ],
+                "selection_criteria": [
+                    "Step 1: Test linearity assumption through scatter plot examination.",
+                    "Step 2: Test assumptions: linearity, normality, homoscedasticity.",
+                    "Step 3: Use Pearson correlation test if assumptions are met to assess significance of linear relationship.",
+                    "Step 4: Use Spearman rank correlation if assumptions are violated.",
+                    "Step 5: Use simple linear regression if goal is prediction of one variable from another.",
+                    "Step 6: Test regression slope significance using t-test.",
+                    "Step 7: Ensure both variables are continuous and observations are independent."
+                ],
+                "application_criteria": {
+                    "Pearson correlation test": "Linear relationship assumption met - Both variables continuous and normally distributed - No extreme outliers - Sample size ≥ 10 (minimum), ≥ 30 recommended",
+                    "Spearman rank correlation": "Non-normal distribution - Monotonic relationship - Ordinal or ranked data - Assumptions for Pearson correlation violated",
+                    "simple linear regression": "When predicting one variable from another - Linear model validation required"
+                }
+            },
+            "priority_tests": [
+                "Linearity Assessment",
+                "Assumption Testing",
+                "Pearson or Spearman Correlation",
+                "Regression Analysis",
+                "Regression Assumptions Check"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous + binary variable",
+            "descriptive": {
+                "statistics": [
+                    "point-biserial correlation coefficient",
+                    "group statistics"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate group statistics (means, standard deviations) for continuous variable by binary groups.",
+                    "Step 2: Calculate point-biserial correlation coefficient between continuous and binary variable.",
+                    "Step 3: Compare distributions of continuous variable across binary groups."
+                ],
+                "application_criteria": [
+                    "Point-biserial Correlation: Measure relationship strength",
+                    "Group Statistics: Calculate means and SDs for each binary group"
+                ]
+            },
+            "visualization": {
+                "box plot by groups": "Select to compare continuous variable distributions by binary groups.",
+                "scatter plot": "Select to show relationship between continuous and binary variable.",
+                "application_criteria": {
+                    "box plot by groups": "Compare continuous variable distributions",
+                    "scatter plot": "Show relationship pattern"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "point-biserial correlation",
+                    "simple regression"
+                ],
+                "selection_criteria": [
+                    "Step 1: Use point-biserial correlation to test significance of relationship between continuous and binary variable.",
+                    "Step 2: Use simple regression if predicting continuous variable from binary variable.",
+                    "Step 3: Ensure adequate sample size in both binary groups."
+                ],
+                "application_criteria": {
+                    "point-biserial correlation test": "Test significance of relationship",
+                    "simple regression": "Predict continuous from binary variable"
+                }
+            },
+            "priority_tests": [
+                "Point-biserial Correlation",
+                "Group Comparison",
+                "Binary Variable Analysis"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous + categorical nominal",
+            "descriptive": {
+                "statistics": [
+                    "group means",
+                    "medians",
+                    "standard deviations"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate descriptive statistics (mean, median, SD) for each group separately.",
+                    "Step 2: Assess normality within each group using appropriate tests.",
+                    "Step 3: Check for equal variances between groups using Levene's test.",
+                    "Step 4: Choose appropriate central tendency measure based on distribution shape."
+                ],
+                "application_criteria": [
+                    "Group Means, Medians, SDs: Calculate for each group separately"
+                ]
+            },
+            "visualization": {
+                "box plot": "Select to compare distributions between two groups effectively.",
+                "violin plot": "Select to show distribution shape and summary statistics simultaneously.",
+                "density plot": "Select to overlay distribution curves for visual comparison.",
+                "application_criteria": {
+                    "box plot": "Compare distributions between groups",
+                    "violin plot": "Show distribution shape and statistics",
+                    "density plot": "Overlay distribution curves"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "independent t-test",
+                    "Mann-Whitney U test",
+                    "Welch t-test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Test normality assumption in both groups using Shapiro-Wilk test.",
+                    "Step 2: Test equal variances assumption using Levene's test.",
+                    "Step 3: If normality and equal variances hold, use independent t-test.",
+                    "Step 4: If normality holds but variances unequal, use Welch t-test.",
+                    "Step 5: If normality violated, use Mann-Whitney U test (non-parametric alternative)."
+                ],
+                "application_criteria": {
+                    "independent t-test": "Sample size ≥ 15 per group recommended - Normal distribution in both groups (Shapiro-Wilk p > 0.05) - Equal variances (Levene's test p > 0.05)",
+                    "Welch t-test": "Normal distribution but unequal variances - Sample size ≥ 15 per group",
+                    "Mann-Whitney U test": "Non-normal distributions OR sample size < 15 per group - Non-parametric alternative"
+                }
+            },
+            "priority_tests": [
+                "Normality Testing",
+                "Equal Variances Test",
+                "Independent t-test or Mann-Whitney U"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous + categorical nominal",
+            "descriptive": {
+                "statistics": [
+                    "group means",
+                    "medians",
+                    "ANOVA table"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate descriptive statistics for each group separately.",
+                    "Step 2: Assess overall variance pattern using ANOVA table decomposition.",
+                    "Step 3: Check normality within each group.",
+                    "Step 4: Test homogeneity of variances across all groups."
+                ],
+                "application_criteria": [
+                    "Group Statistics: Means, medians for each group",
+                    "ANOVA Table: Variance decomposition"
+                ]
+            },
+            "visualization": {
+                "box plot": "Select to compare distributions across multiple groups.",
+                "violin plot": "Select to show shape and statistics for all groups simultaneously.",
+                "bar chart with error bars": "Select to display means with confidence intervals.",
+                "application_criteria": {
+                    "box plot": "Compare multiple groups",
+                    "violin plot": "Show shapes for all groups",
+                    "bar chart with error bars": "Display means with confidence intervals"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "one-way ANOVA",
+                    "Kruskal-Wallis test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Test normality assumption within each group.",
+                    "Step 2: Test homogeneity of variances using Levene's test.",
+                    "Step 3: If assumptions met, use one-way ANOVA.",
+                    "Step 4: If normality or equal variances violated, use Kruskal-Wallis test.",
+                    "Step 5: Follow up significant results with post-hoc tests for pairwise comparisons."
+                ],
+                "application_criteria": {
+                    "one-way ANOVA": "Sample size ≥ 15 per group - Normal distribution within each group - Homogeneity of variances (Levene's test p > 0.05)",
+                    "Kruskal-Wallis test": "Non-normal distributions OR small sample sizes - Non-parametric alternative - Follow with post-hoc tests if significant"
+                }
+            },
+            "priority_tests": [
+                "Normality Testing",
+                "Homogeneity of Variances",
+                "One-way ANOVA or Kruskal-Wallis"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous + categorical ordinal",
+            "descriptive": {
+                "statistics": [
+                    "group medians",
+                    "trend analysis"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate medians for each ordered group to assess central tendency.",
+                    "Step 2: Examine trend pattern across ordered categories.",
+                    "Step 3: Assess if there's a monotonic relationship across ordered groups."
+                ],
+                "application_criteria": [
+                    "Group Medians: For each ordered category",
+                    "Trend Analysis: Examine monotonic patterns"
+                ]
+            },
+            "visualization": {
+                "ordered box plots": "Select to display groups in their natural order.",
+                "line plot": "Select to show trend across ordered categories clearly.",
+                "application_criteria": {
+                    "ordered box plots": "Maintain natural order",
+                    "line plot": "Show trend across categories"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Jonckheere-Terpstra test",
+                    "ordinal regression"
+                ],
+                "selection_criteria": [
+                    "Step 1: Use Jonckheere-Terpstra test to assess monotonic trend across ordered groups.",
+                    "Step 2: Use ordinal regression if modeling relationship with ordered predictor.",
+                    "Step 3: Ensure meaningful ordering in categorical variable."
+                ],
+                "application_criteria": {
+                    "Jonckheere-Terpstra test": "Test monotonic trend across ordered groups - Sample size ≥ 12 recommended",
+                    "ordinal regression": "Model relationship with ordered predictor"
+                }
+            },
+            "priority_tests": [
+                "Jonckheere-Terpstra Test",
+                "Trend Analysis",
+                "Monotonic Pattern Assessment"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "binary variable + binary variable",
+            "descriptive": {
+                "statistics": [
+                    "phi coefficient",
+                    "2x2 contingency table"
+                ],
+                "selection_criteria": [
+                    "Step 1: Create 2x2 contingency table showing joint frequencies.",
+                    "Step 2: Calculate phi coefficient as correlation measure for binary variables.",
+                    "Step 3: Examine pattern of association in contingency table."
+                ],
+                "application_criteria": [
+                    "2x2 Contingency Table: Joint frequencies",
+                    "Phi Coefficient: Correlation for binary variables"
+                ]
+            },
+            "visualization": {
+                "2x2 contingency table": "Select to display joint frequencies clearly.",
+                "mosaic plot": "Select for visual representation of association strength.",
+                "application_criteria": {
+                    "2x2 table": "Display joint frequencies",
+                    "mosaic plot": "Visual association representation"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "phi coefficient",
+                    "chi-square test of independence",
+                    "Fisher's exact test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Check sample size adequacy for chi-square test (expected frequencies >5).",
+                    "Step 2: Use chi-square test of independence if sample size adequate.",
+                    "Step 3: Use Fisher's exact test for small samples or when expected frequencies <5.",
+                    "Step 4: Calculate phi coefficient to measure association strength."
+                ],
+                "application_criteria": {
+                    "chi-square test of independence": "Expected frequencies ≥ 5 in all cells - Total sample size ≥ 20",
+                    "Fisher's exact test": "Expected frequencies < 5 in any cell - Small sample sizes (n < 20)",
+                    "phi coefficient": "Measure association strength (-1 to +1)"
+                }
+            },
+            "priority_tests": [
+                "Sample Size Check",
+                "Chi-square or Fisher's Exact Test",
+                "Phi Coefficient"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "categorical nominal + numerical continuous",
+            "descriptive": {
+                "statistics": [
+                    "group means",
+                    "group standard deviations",
+                    "eta-squared"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate descriptive statistics for each categorical group.",
+                    "Step 2: Compare group means and variability measures.",
+                    "Step 3: Calculate eta-squared as measure of association strength.",
+                    "Step 4: Examine distribution shape within each group."
+                ],
+                "application_criteria": [
+                    "Group means: Central tendency comparison",
+                    "Group standard deviations: Variability assessment",
+                    "Eta-squared: Effect size measurement"
+                ]
+            },
+            "visualization": {
+                "box plot": "Select to compare distributions across groups.",
+                "violin plot": "Select to show distribution shape and density.",
+                "bar chart with error bars": "Select to compare means with uncertainty.",
+                "application_criteria": {
+                    "box plot": "Distribution comparison across categories",
+                    "violin plot": "Detailed distribution shape visualization",
+                    "bar chart": "Mean comparison with confidence intervals"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "independent t-test",
+                    "one-way ANOVA",
+                    "Mann-Whitney U test",
+                    "Kruskal-Wallis test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Check normality within each group using Shapiro-Wilk test.",
+                    "Step 2: Check homogeneity of variances using Levene's test.",
+                    "Step 3: For 2 groups: use t-test if assumptions met, Mann-Whitney if violated.",
+                    "Step 4: For 3+ groups: use ANOVA if assumptions met, Kruskal-Wallis if violated."
+                ],
+                "application_criteria": {
+                    "independent t-test": "2 groups - Normal distribution - Equal variances",
+                    "one-way ANOVA": "3+ groups - Normal distribution - Equal variances",
+                    "Mann-Whitney U test": "2 groups - Non-normal distribution or unequal variances",
+                    "Kruskal-Wallis test": "3+ groups - Non-normal distribution or unequal variances"
+                }
+            },
+            "priority_tests": [
+                "Normality and Variance Testing",
+                "Group Comparison Test Selection",
+                "Effect Size Calculation"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "categorical ordinal + numerical continuous",
+            "descriptive": {
+                "statistics": [
+                    "Spearman's rho",
+                    "Kendall's tau",
+                    "group medians"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate rank-based correlation coefficients.",
+                    "Step 2: Compare medians across ordinal groups.",
+                    "Step 3: Assess monotonic trend across ordinal levels.",
+                    "Step 4: Examine distribution characteristics within ordinal groups."
+                ],
+                "application_criteria": [
+                    "Spearman's rho: Monotonic relationship assessment",
+                    "Kendall's tau: Alternative rank correlation",
+                    "Group medians: Robust central tendency comparison"
+                ]
+            },
+            "visualization": {
+                "box plot with ordered categories": "Select to show trend across ordinal levels.",
+                "scatter plot with jittered ordinal": "Select to visualize relationship pattern.",
+                "trend line plot": "Select to show monotonic relationship.",
+                "application_criteria": {
+                    "ordered box plot": "Trend visualization across ordinal categories",
+                    "jittered scatter": "Individual data point relationship",
+                    "trend line": "Monotonic pattern demonstration"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Spearman rank correlation test",
+                    "Kendall's tau test",
+                    "Jonckheere-Terpstra test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Use Spearman rank correlation to test monotonic relationship significance.",
+                    "Step 2: Use Kendall's tau as alternative rank-based measure.",
+                    "Step 3: Use Jonckheere-Terpstra test for ordered alternative hypothesis.",
+                    "Step 4: Consider sample size for test power and reliability."
+                ],
+                "application_criteria": {
+                    "Spearman rank correlation test": "Monotonic relationship testing - Ordinal to continuous",
+                    "Kendall's tau test": "Alternative rank correlation - Smaller sample sizes",
+                    "Jonckheere-Terpstra test": "Trend test across ordered groups - Multiple ordinal levels"
+                }
+            },
+            "priority_tests": [
+                "Rank Correlation Analysis",
+                "Monotonic Trend Testing",
+                "Ordered Alternative Testing"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical discrete + numerical discrete",
+            "descriptive": {
+                "statistics": [
+                    "Pearson correlation coefficient",
+                    "covariance",
+                    "joint frequency distribution"
+                ],
+                "selection_criteria": [
+                    "Step 1: Create joint frequency table for discrete value combinations.",
+                    "Step 2: Calculate Pearson correlation if approximately continuous.",
+                    "Step 3: Assess covariance for joint variability pattern.",
+                    "Step 4: Examine distribution of paired discrete values."
+                ],
+                "application_criteria": [
+                    "Joint frequency: Discrete value combination patterns",
+                    "Pearson correlation: Linear association strength",
+                    "Covariance: Joint variability measurement"
+                ]
+            },
+            "visualization": {
+                "scatter plot with jittering": "Select to reduce overplotting of discrete values.",
+                "bubble plot": "Select to show frequency of value combinations.",
+                "heatmap of joint frequencies": "Select for discrete value combination visualization.",
+                "application_criteria": {
+                    "jittered scatter": "Discrete value relationship visualization",
+                    "bubble plot": "Frequency-weighted value combinations",
+                    "frequency heatmap": "Joint distribution pattern"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Pearson correlation test",
+                    "Spearman rank correlation",
+                    "chi-square test of independence"
+                ],
+                "selection_criteria": [
+                    "Step 1: Assess if discrete variables approximate continuity.",
+                    "Step 2: Use Pearson correlation if many discrete levels and normal distribution.",
+                    "Step 3: Use Spearman correlation for ordinal discrete or non-normal.",
+                    "Step 4: Use chi-square test if treating as categorical."
+                ],
+                "application_criteria": {
+                    "Pearson correlation test": "Many discrete levels - Approximately normal distribution",
+                    "Spearman rank correlation": "Ordinal discrete - Non-normal distribution",
+                    "chi-square test": "Few discrete levels - Categorical treatment"
+                }
+            },
+            "priority_tests": [
+                "Distribution Assessment",
+                "Appropriate Correlation Test",
+                "Association Strength Measurement"
+            ]
+        },
+        {
+            "no_of_variable": "bivariate",
+            "var_type": "numerical continuous time series + numerical continuous",
+            "descriptive": {
+                "statistics": [
+                    "autocorrelation function",
+                    "cross-correlation function",
+                    "trend analysis"
+                ],
+                "selection_criteria": [
+                    "Step 1: Calculate autocorrelation to assess temporal dependence.",
+                    "Step 2: Calculate cross-correlation between time series and numerical variable.",
+                    "Step 3: Analyze trend patterns and seasonal components.",
+                    "Step 4: Examine lead-lag relationships between series."
+                ],
+                "application_criteria": [
+                    "Autocorrelation: Temporal dependence assessment",
+                    "Cross-correlation: Inter-series relationship",
+                    "Trend analysis: Long-term pattern identification"
+                ]
+            },
+            "visualization": {
+                "time series plot": "Select to visualize temporal patterns.",
+                "cross-correlation plot": "Select to show lag relationships.",
+                "scatter plot with time coloring": "Select to show temporal evolution of relationship.",
+                "application_criteria": {
+                    "time series plot": "Primary temporal visualization",
+                    "cross-correlation plot": "Lag relationship identification",
+                    "temporal scatter": "Relationship evolution over time"
+                }
+            },
+            "inferential": {
+                "tests": [
+                    "Granger causality test",
+                    "cointegration test",
+                    "cross-correlation significance test"
+                ],
+                "selection_criteria": [
+                    "Step 1: Test for unit roots in both series using ADF test.",
+                    "Step 2: Test Granger causality for predictive relationships.",
+                    "Step 3: Test cointegration if both series are non-stationary.",
+                    "Step 4: Test significance of cross-correlations at various lags."
+                ],
+                "application_criteria": {
+                    "Granger causality test": "Predictive relationship testing - Stationary series",
+                    "cointegration test": "Long-term equilibrium relationship - Non-stationary series",
+                    "cross-correlation test": "Lag relationship significance - Various time delays"
+                }
+            },
+            "priority_tests": [
+                "Stationarity Testing",
+                "Temporal Relationship Analysis",
+                "Lead-Lag Assessment"
+            ]
+        }
+    ]
+}

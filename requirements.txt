@@ -1,0 +1,11 @@
+chromadb
+pandas
+numpy
+scipy
+statsmodels
+matplotlib
+seaborn
+google-generativeai
+python-dotenv
+flask
+streamlit

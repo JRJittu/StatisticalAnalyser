@@ -1,0 +1,333 @@
+[
+  {
+    "type": "numerical continuous",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Mean Imputation",
+          "when_to_use": "When data is normally distributed and there are no significant outliers."
+        },
+        {
+          "method": "Median Imputation",
+          "when_to_use": "When data is skewed or contains outliers. Preserves the central tendency better than mean."
+        },
+        {
+          "method": "Mode Imputation",
+          "when_to_use": "When there's a clear most frequent value, rare for continuous data."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Z-Score",
+          "threshold": "±3 standard deviations",
+          "when_to_use": "When data is approximately normally distributed"
+        },
+        {
+          "method": "IQR (Interquartile Range)",
+          "threshold": "Q1 - 1.5*IQR or Q3 + 1.5*IQR",
+          "when_to_use": "Robust method, works well with skewed data"
+        },
+        {
+          "method": "Modified Z-Score (MAD)",
+          "threshold": "±3.5 median absolute deviations",
+          "when_to_use": "More robust than Z-score, good for skewed data"
+        }
+      ]
+    },
+    "prior_tests": [
+      "scipy.stats.shapiro(data) - Test for normality",
+      "scipy.stats.skew(data) - Measure skewness to determine if data is skewed",
+      "scipy.stats.kurtosis(data) - Measure kurtosis for distribution shape"
+    ]
+  },
+  {
+    "type": "numerical discrete",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Mode Imputation",
+          "when_to_use": "When one value appears most frequently. Safe for categorical-like discrete numbers."
+        },
+        {
+          "method": "Median Imputation",
+          "when_to_use": "When the distribution is skewed. Useful when values are ranked but not continuous."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Frequency Analysis",
+          "when_to_use": "Identify extremely rare discrete values",
+          "threshold": "Values appearing less than X% of the time"
+        },
+        {
+          "method": "IQR Method",
+          "when_to_use": "When discrete values have meaningful ordering",
+          "threshold": "Q1 - 1.5*IQR or Q3 + 1.5*IQR"
+        }
+      ]
+    },
+    "prior_tests": [
+      "scipy.stats.mode(data) - Identify the most frequent value and its frequency",
+      "np.unique(data, return_counts=True) - Analyze value distribution and frequency",
+      "scipy.stats.skew(data) - Check skewness to decide between mode and median",
+      "len(np.unique(data)) / len(data) - Calculate cardinality ratio",
+      "pd.value_counts(data, normalize=True) - Calculate frequency distribution",
+      "scipy.stats.rankdata(data) - Check if values have meaningful ordering",
+      "np.percentile(data, [25, 75]) - Calculate quartiles for IQR method applicability"
+    ]
+  },
+  {
+    "type": "categorical nominal",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Mode Imputation",
+          "when_to_use": "Most common strategy. Use when one category is dominant."
+        },
+        {
+          "method": "Create 'Missing' Category",
+          "when_to_use": "To retain information that a value was missing. Give appropriate missing category name."
+        },
+        {
+          "method": "Random Sampling",
+          "when_to_use": "When preserving original category distribution is important."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Frequency Analysis",
+          "when_to_use": "Identify extremely rare categories",
+          "threshold": "Categories appearing less than 1-5% of the time"
+        },
+        {
+          "method": "Cardinality Check",
+          "when_to_use": "Categories that might be data entry errors",
+          "threshold": "Unusual category names or formats"
+        }
+      ]
+    },
+    "prior_tests": [
+      "pd.value_counts(data, normalize=True) - Analyze category distribution",
+      "data.mode()[0] - Identify most frequent category",
+      "len(data.unique()) / len(data) - Calculate category diversity ratio",
+      "data.isnull().sum() / len(data) - Calculate missing value proportion",
+      "data.unique() - Examine all unique categories for anomalies",
+      "data.str.len().describe() - Check string length distribution for format consistency",
+      "data.str.contains(r'[^a-zA-Z0-9\\s]', na=False).sum() - Count categories with special characters",
+      "len(data.unique()) - Assess total number of unique categories"
+    ]
+  },
+  {
+    "type": "categorical ordinal",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Median (Ordinal Encoding)",
+          "when_to_use": "After converting categories to ordered integers. Use median to preserve order."
+        },
+        {
+          "method": "Mode Imputation",
+          "when_to_use": "When the most frequent level dominates. Safe but may lose ordinal nuance."
+        },
+        {
+          "method": "Interpolation (Ordinal)",
+          "when_to_use": "When missing values can be estimated from neighboring ordinal levels."
+        },
+        {
+          "method": "Create 'Missing' Category",
+          "when_to_use": "When missing pattern is informative and should be preserved."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Frequency Analysis",
+          "when_to_use": "Identify extremely rare ordinal levels",
+          "threshold": "Levels appearing less than specified percentage"
+        },
+        {
+          "method": "Gap Analysis",
+          "when_to_use": "Identify unexpected jumps in ordinal sequence",
+          "threshold": "Missing expected intermediate levels"
+        }
+      ]
+    },
+    "prior_tests": [
+      "pd.Categorical(data, ordered=True) - Verify ordinal structure",
+      "scipy.stats.spearmanr(encoded_data, target) - Test ordinal relationship strength if target exists",
+      "np.diff(np.sort(encoded_values)) - Check if ordinal levels are evenly spaced",
+      "pd.value_counts(data, normalize=True) - Analyze distribution across ordinal levels",
+      "data.isnull().sum() / len(data) - Calculate missing value proportion",
+      "np.unique(encoded_data) - Check for gaps in ordinal sequence",
+      "np.diff(np.sort(np.unique(encoded_data))) - Identify sequence gaps",
+      "data.value_counts().sort_index() - Ordered frequency count",
+      "len(data.unique()) - Total number of ordinal levels present"
+    ]
+  },
+  {
+    "type": "binary variable",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Mode Imputation",
+          "when_to_use": "When one binary value is significantly more common than the other."
+        },
+        {
+          "method": "Random Sampling",
+          "when_to_use": "When both binary values are roughly equally distributed."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Imbalance Analysis",
+          "when_to_use": "Check for extreme class imbalance",
+          "threshold": "One class represents <5% or >95% of data"
+        },
+        {
+          "method": "Pattern Analysis",
+          "when_to_use": "Identify unusual patterns in binary sequences",
+          "threshold": "Unexpected clustering or switching patterns"
+        }
+      ]
+    },
+    "prior_tests": [
+      "pd.value_counts(data, normalize=True) - Check binary class distribution",
+      "data.mode()[0] - Identify dominant class",
+      "abs(data.value_counts(normalize=True).iloc[0] - 0.5) - Measure deviation from 50-50 split",
+      "data.isnull().sum() / len(data) - Calculate missing proportion",
+      "min(data.value_counts(normalize=True)) - Find minority class proportion",
+      "data.diff().abs().sum() - Count number of state changes in sequence",
+      "scipy.stats.runs_test(data) - Test for randomness in binary sequence",
+      "np.corrcoef(data[:-1], data[1:])[0,1] - Check autocorrelation in sequence"
+    ]
+  },
+  {
+    "type": "numerical continuous time series",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Forward Fill (ffill)",
+          "when_to_use": "When the previous observation is likely to persist or carry forward logically (e.g., sensor readings, stock prices)."
+        },
+        {
+          "method": "Backward Fill (bfill)",
+          "when_to_use": "When future value can reasonably fill in for earlier missing point."
+        },
+        {
+          "method": "Linear Interpolation",
+          "when_to_use": "When values are expected to change gradually over time, ideal for continuous measurements like temperature, sales, etc."
+        },
+        {
+          "method": "Seasonal Decomposition + Imputation",
+          "when_to_use": "When data has clear seasonal patterns."
+        },
+        {
+          "method": "ARIMA/SARIMA Imputation",
+          "when_to_use": "For sophisticated time series with trends and seasonality."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Rolling Statistics",
+          "when_to_use": "Detect values that deviate from local rolling mean/std",
+          "threshold": "Points outside rolling mean ± k*rolling_std",
+          "window_size": "Adjust based on data frequency and patterns"
+        },
+        {
+          "method": "Seasonal Decomposition",
+          "when_to_use": "Identify outliers in trend, seasonal, or residual components",
+          "threshold": "Outliers in residual component after trend/seasonal removal"
+        },
+        {
+          "method": "Rate of Change Analysis",
+          "threshold": "Percentage change exceeding normal variation"
+        },
+        {
+          "method": "Isolation Forest (Time-aware)",
+          "threshold": "Contamination parameter based on expected outlier percentage"
+        }
+      ]
+    },
+    "prior_tests": [
+      "statsmodels.tsa.seasonal.seasonal_decompose(data) - Detect trend and seasonality",
+      "statsmodels.tsa.stattools.adfuller(data) - Test for stationarity",
+      "statsmodels.tsa.stattools.acf(data, nlags=40) - Analyze autocorrelation",
+      "statsmodels.tsa.stattools.pacf(data, nlags=40) - Partial autocorrelation analysis",
+      "scipy.stats.pearsonr(data[:-1], data[1:]) - Test temporal correlation",
+      "np.diff(data).var() / data.var() - Assess volatility vs level",
+      "statsmodels.tsa.stattools.kpss(data) - Alternative stationarity test",
+      "pd.Series(data).rolling(window=n).std() - Calculate rolling standard deviation",
+      "np.abs(np.diff(data)).mean() - Average absolute change rate",
+      "statsmodels.tsa.stattools.acf(data, nlags=min(40, len(data)//4)) - Check autocorrelation structure",
+      "scipy.stats.jarque_bera(data) - Test normality of time series",
+      "pd.Series(data).pct_change().std() - Percentage change volatility"
+    ]
+  },
+  {
+    "type": "numerical discrete time series",
+    "missing_value_imputation": {
+      "filling_methods": [
+        {
+          "method": "Forward Fill (ffill)",
+          "when_to_use": "When it's safe to assume the last known count value remains until updated (e.g., inventory count, cumulative event count)."
+        },
+        {
+          "method": "Mode Imputation (Windowed)",
+          "when_to_use": "When values fluctuate around a common number; use most frequent recent value."
+        },
+        {
+          "method": "Interpolation + Rounding",
+          "when_to_use": "When a smooth progression is expected, use interpolation and round to nearest valid integer."
+        },
+        {
+          "method": "Seasonal Pattern Imputation",
+          "when_to_use": "For discrete counts with regular patterns (daily sales, weekly events)."
+        }
+      ]
+    },
+    "outlier_detection": {
+      "methods": [
+        {
+          "method": "Count-based Thresholds",
+          "when_to_use": "Identify unusually high or low discrete counts",
+          "threshold": "Values exceeding expected count ranges"
+        },
+        {
+          "method": "Temporal Pattern Analysis",
+          "when_to_use": "Detect counts that break established patterns",
+          "threshold": "Deviations from seasonal or cyclical norms"
+        },
+        {
+          "method": "Rate Analysis",
+          "when_to_use": "Identify abnormal changes in discrete value rates",
+          "threshold": "Sudden increases/decreases in count rates"
+        }
+      ]
+    },
+    "prior_tests": [
+      "statsmodels.tsa.seasonal.seasonal_decompose(data, model='additive') - Test for seasonal patterns",
+      "pd.Series(data).rolling(window=7).apply(lambda x: scipy.stats.mode(x)[0][0]) - Windowed mode analysis",
+      "np.unique(data, return_counts=True) - Analyze discrete value distribution",
+      "statsmodels.tsa.stattools.acf(data, nlags=min(40, len(data)//4)) - Temporal correlation in counts",
+      "scipy.stats.poisson.fit(data) - Test if data follows Poisson distribution",
+      "np.diff(data).var() / data.var() - Assess count stability",
+      "pd.Series(data).groupby(pd.Grouper(freq='D')).mean() - Daily pattern analysis if datetime index",
+      "np.percentile(data, [5, 95]) - Establish normal count range",
+      "np.abs(np.diff(data)).mean() - Average absolute change in counts",
+      "pd.Series(data).rolling(window=7).mean() - Rolling average for pattern baseline",
+      "np.std(np.diff(data)) - Volatility in count changes",
+      "scipy.stats.chi2_contingency(pd.crosstab(time_periods, count_bins)) - Test temporal independence"
+    ]
+  }
+]
