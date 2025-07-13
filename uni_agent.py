@@ -3,15 +3,14 @@ import numpy as np
 import json
 import google.generativeai as genai
 import os
-from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from scipy import stats
 
 from kb_statistical import StatisticalKnowledgeBase
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+from utils import util_functions
 
 class UnivariateAnalyzer:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase):
+    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY: str):
         self.data = None
         self.var_type = None
         self.knowledge_base = knowledge_base
@@ -21,37 +20,16 @@ class UnivariateAnalyzer:
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
-    def extract_json_from_response(self, response_text):
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
-
-        if "python" in response_text.split('\n')[0]:
-            response_text = '\n'.join(response_text.split('\n')[1:])
-
-        return response_text
-
-    def convert_to_serializable(self, obj):
-        if isinstance(obj, dict):
-            return {k: self.convert_to_serializable(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self.convert_to_serializable(i) for i in obj]
-        elif isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        else:
-            return obj
-
     def analyze(self, data_column: pd.Series, var_type: str, metadata: str, column_name: str):
         self.data = data_column
         self.var_type = var_type
         self.metadata = metadata
         self.fetch_knowledge(var_type)
         desc_result = self.perform_descriptive_stats(data_column, metadata)
-        self.perform_visualization(data_column, desc_result, column_name)
-        self.perform_inferential_stats(data_column, desc_result, metadata)
+        vis_result = self.perform_visualization(data_column, desc_result, column_name)
+        inf_result = self.perform_inferential_stats(data_column, desc_result, metadata)
+
+        return desc_result, vis_result, inf_result
 
     def fetch_knowledge(self, var_type):
         # print("\nFetching statistical knowledge...")
@@ -99,7 +77,7 @@ class UnivariateAnalyzer:
         """
 
         response = self.model.generate_content(descriptive_prompt)
-        python_code = self.extract_json_from_response(response.text)
+        python_code = util_functions.extract_json_from_response(response.text)
 
         print("\nGenerated Python Code:\n", python_code)
 
@@ -107,7 +85,7 @@ class UnivariateAnalyzer:
         exec(python_code, {}, local_vars)
 
         intermediate_result = local_vars.get('result')
-        serializable_result = self.convert_to_serializable(intermediate_result)
+        serializable_result = util_functions.convert_to_serializable(intermediate_result)
         print("intermediate: ", intermediate_result)
         print("serail: ", serializable_result)
 
@@ -150,7 +128,7 @@ class UnivariateAnalyzer:
         """
 
         response = self.model.generate_content(reasoning_prompt)
-        json_string = self.extract_json_from_response(response.text)
+        json_string = util_functions.extract_json_from_response(response.text)
 
         descriptive_result = json.loads(json_string)
         print("\nFinal Descriptive Statistics Result:")
@@ -183,7 +161,7 @@ class UnivariateAnalyzer:
             - Complete Python code using matplotlib.pyplot.
             - The code no need to include the definition of the data variable at the beginning and use variable name as data_column in the code.
             - Don't include any import statement, comments.
-            - The code must save the plot as an image (file name: 'columnName_vis1.png' and 'columnName_vis2.png' respectively).
+            - The code must save the plot as an image (file name: 'uploads/columnName_vis1.png' and 'uploads/columnName_vis2.png' respectively).
             - "reason": clearly explain why this visualization is the best choice for the provided data using descriptive statistics.
             - If selecting histogram, use bins size appropriately using range of given data
             - Deside on size and ranges of graph in the code based on max and min values of give data column
@@ -208,7 +186,7 @@ class UnivariateAnalyzer:
         response = self.model.generate_content(prompt)
         # print(response.text, "\n")
 
-        json_string = self.extract_json_from_response(response.text)
+        json_string = util_functions.extract_json_from_response(response.text)
         visualization_suggestions = json.loads(json_string)
         for k, v in visualization_suggestions.items():
             print(k, " : ", v)
@@ -223,7 +201,7 @@ class UnivariateAnalyzer:
             exec_code_2 = visualization_suggestions['visualization_2']['python_code']
             exec(exec_code_2, local_vars)
 
-        # return visualization_suggestions
+        return visualization_suggestions
 
 
     def perform_inferential_stats(self, data_column, desc_results, metadata):
@@ -276,7 +254,7 @@ class UnivariateAnalyzer:
         """
 
         response = self.model.generate_content(inferential_prompt)
-        json_string = self.extract_json_from_response(response.text)
+        json_string = util_functions.extract_json_from_response(response.text)
         inferential_results = json.loads(json_string)
 
         for test_name, test_details in inferential_results.items():
@@ -319,7 +297,7 @@ class UnivariateAnalyzer:
         """
 
         conclusion_response = self.model.generate_content(conclusion_prompt)
-        final_json_string = self.extract_json_from_response(conclusion_response.text)
+        final_json_string = util_functions.extract_json_from_response(conclusion_response.text)
         final_inferential_results = json.loads(final_json_string)
 
         print("\nFinal Inferential Statistics Results:")

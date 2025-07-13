@@ -2,8 +2,8 @@ import json
 import chromadb
 
 class StatisticalKnowledgeBase:
-    def __init__(self, persist_directory="stat_kb_dir"):
-        self.client = chromadb.PersistentClient(path=persist_directory)
+    def __init__(self, persist_dir="stat_kb_dir"):
+        self.client = chromadb.PersistentClient(path=persist_dir)
         self.collection = self.client.get_or_create_collection(name="stat_kb_dir")
 
     def load_knowledge(self, json_path):

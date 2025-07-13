@@ -9,10 +9,8 @@ import os
 from utils import util_functions
 from kb_preprocess import PreprocessorKB
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
 class PreprocessorAgent:
-    def __init__(self, knowledge_base: PreprocessorKB):
+    def __init__(self, knowledge_base: PreprocessorKB, GOOGLE_API_KEY: str):
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
         self.knowledge_base = knowledge_base

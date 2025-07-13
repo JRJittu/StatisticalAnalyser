@@ -3,13 +3,7 @@ import pandas as pd
 import os
 import json
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
-
-def detect_datatypes(csv_file_path):
-    df = pd.read_csv(csv_file_path)
-
+def detect_datatypes(df, model):
     column_info = {}
     for col in df.columns:
         sample_values = df[col].dropna().head(10).tolist()
@@ -40,7 +34,6 @@ def detect_datatypes(csv_file_path):
 
     response = model.generate_content(prompt)
 
-    # Convert response to dictionary
     result_dict = {}
     for line in response.text.strip().splitlines():
         if ':' in line:

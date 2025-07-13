@@ -9,3 +9,4 @@ google-generativeai
 python-dotenv
 flask
 streamlit
+sentence-transformers

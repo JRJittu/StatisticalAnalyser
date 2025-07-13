@@ -11,7 +11,7 @@ from utils import util_functions
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
-class Bi_critique:
+class BiCritique:
     def __init__(self, knowledge_base: StatisticalKnowledgeBase):
         self.knowledge_base = knowledge_base
         genai.configure(api_key=GOOGLE_API_KEY)

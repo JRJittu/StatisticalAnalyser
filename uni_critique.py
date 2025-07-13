@@ -6,46 +6,21 @@ import google.generativeai as genai
 import os
 
 from kb_statistical import StatisticalKnowledgeBase
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+from utils import util_functions
 
-class Uni_critique:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase):
+class UniCritique:
+    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY):
         self.knowledge_base = knowledge_base
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
     def get_knowledge_for_variable(self, var_type: str) -> Dict:
-        """Get knowledge base recommendations for variable type"""
         doc = self.knowledge_base.search_knowledge("univariate", var_type)
         if doc == "No relevant statistical test found.":
             raise ValueError(f"No statistical knowledge found for variable type: {var_type}")
         return json.loads(doc)
 
-    def extract_json_from_response(self, response_text: str) -> str:
-        """Extract JSON from model response"""
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
-        return response_text
-
-    def convert_to_serializable(self, obj):
-        """Convert numpy types to JSON serializable types"""
-        if isinstance(obj, dict):
-            return {k: self.convert_to_serializable(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self.convert_to_serializable(i) for i in obj]
-        elif isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif pd.isna(obj):
-            return None
-        else:
-            return obj
-
-    def validate_descriptive_statistics(self, data_column: pd.Series, var_type: str,
-                                      generated_code: str) -> Tuple[bool, str]:
+    def validate_descriptive_statistics(self, data_column: pd.Series, var_type: str, generated_code: str) -> Tuple[bool, str]:
         """
         Validate descriptive statistics against knowledge base recommendations
         """
@@ -97,7 +72,7 @@ class Uni_critique:
             """
 
             response = self.model.generate_content(validation_prompt)
-            json_string = self.extract_json_from_response(response.text)
+            json_string = util_functions.extract_json_from_response(response.text)
             validation_result = json.loads(json_string)
 
             return validation_result["validation_passed"], validation_result["summary"]
@@ -146,7 +121,7 @@ class Uni_critique:
             """
 
             response = self.model.generate_content(validation_prompt)
-            json_string = self.extract_json_from_response(response.text)
+            json_string = util_functions.extract_json_from_response(response.text)
             validation_result = json.loads(json_string)
 
             return validation_result["validation_passed"], validation_result["summary"]
@@ -203,7 +178,7 @@ class Uni_critique:
             """
 
             response = self.model.generate_content(validation_prompt)
-            json_string = self.extract_json_from_response(response.text)
+            json_string = util_functions.extract_json_from_response(response.text)
             validation_result = json.loads(json_string)
 
             return validation_result["validation_passed"], validation_result["summary"]
@@ -322,7 +297,7 @@ class Uni_critique:
             """
 
             response = self.model.generate_content(recommendation_prompt)
-            json_string = self.extract_json_from_response(response.text)
+            json_string = util_functions.extract_json_from_response(response.text)
             recommendations = json.loads(json_string)
 
             return recommendations

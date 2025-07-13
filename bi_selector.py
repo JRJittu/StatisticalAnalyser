@@ -3,11 +3,12 @@ from itertools import combinations
 import google.generativeai as genai
 from scipy.stats import pearsonr, chi2_contingency, ttest_ind, f_oneway
 import os
+import json
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+from utils import util_functions
 
 class BivariateSelectorAgent:
-    def __init__(self, variable_types: dict, max_pairs: int = 10, correlation_threshold: float = 0.3):
+    def __init__(self, variable_types: dict, GOOGLE_API_KEY: str, max_pairs: int = 10, correlation_threshold: float = 0.3):
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.variable_types = variable_types
@@ -58,7 +59,6 @@ class BivariateSelectorAgent:
             if result["test"] is not None:
                 pairs.append(result)
 
-        print(pairs)
         return pairs
 
     def ask_gemini_to_select_pairs(self, pairs, df):
@@ -90,7 +90,8 @@ class BivariateSelectorAgent:
         response = self.model.generate_content(prompt)
         return response.text
 
-    def select_bivariate_pairs(self, df: pd.DataFrame):
+    def select_bivariate_pairs(self, file_path: str):
+        df = pd.read_csv(file_path)
         candidate_pairs = self.compute_statistics(df)
 
         if not candidate_pairs:
@@ -98,4 +99,5 @@ class BivariateSelectorAgent:
             return []
 
         gemini_response = self.ask_gemini_to_select_pairs(candidate_pairs, df)
-        return gemini_response
+        selected_pairs = json.loads(self.extract_json_from_response(gemini_response))
+        return selected_pairs["selected_pairs"]

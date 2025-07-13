@@ -2,18 +2,16 @@ import pandas as pd
 import numpy as np
 import json
 import google.generativeai as genai
-from typing import Dict, List, Any
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 from kb_statistical import StatisticalKnowledgeBase
 from utils import util_functions
 
 class BivariateAnalyzer:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase):
+    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY):
         self.knowledge_base = knowledge_base
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
@@ -30,16 +28,11 @@ class BivariateAnalyzer:
         combined_var_type = f"{var_type1} + {var_type2}"
         self.fetch_knowledge(combined_var_type)
 
-        self.desc_result = self.perform_descriptive_stats(data_column1, metadata1, data_column2, metadata2)
-        self.perform_visualization(data_column1, col_name1, data_column2, col_name2, self.desc_result)
-        inferential_result = self.perform_inferential_stats(data_column1, metadata1, data_column2, metadata2, self.desc_result)
+        desc_result = self.perform_descriptive_stats(data_column1, metadata1, data_column2, metadata2)
+        vis_result = self.perform_visualization(data_column1, col_name1, data_column2, col_name2, desc_result)
+        inferential_result = self.perform_inferential_stats(data_column1, metadata1, data_column2, metadata2, desc_result)
 
-        # return {
-            # "descriptive": desc_result,
-            # "visualization": self.visualization_suggestions,
-            # "inferential": inferential_result,
-            # "priority_tests": self.priority_test_data
-        # }
+        return desc_result, vis_result, inferential_result
 
     def perform_descriptive_stats(self, data_column1: pd.Series, metadata1: str, data_column2: pd.Series, metadata2: str):
         priority_tests = self.knowledge.get("priority_tests", [])
@@ -164,7 +157,7 @@ class BivariateAnalyzer:
                 - Python code using matplotlib.pyplot to visualize the relationship.
                 - Use the variables `data_column1` and `data_column2` in the code directly.
                 - Do not include any comments and print statements.
-                - Save each plot as: '{column_name1}_{column_name2}_vis1.png' and 'bivariate_{column_name1}_{column_name2}_vis2.png'.
+                - Save each plot as: 'uploads/bi_{column_name1}_{column_name2}_vis1.png' and 'uploads/bi_{column_name1}_{column_name2}_vis2.png'.
                 - Choose graph size and axis ranges based on the min and max values of the data.
                 - "reason": clearly explain why this plot is suitable for the given pair of columns.
                 - If only one visualization is applicable, return just one.

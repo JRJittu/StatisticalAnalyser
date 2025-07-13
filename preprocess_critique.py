@@ -1,136 +1,72 @@
 import pandas as pd
-import google.generativeai as genai
-from scipy import stats
 import numpy as np
-import time
-import logging
-import warnings
-warnings.filterwarnings("ignore")
-import os
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from scipy import stats
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-class GeminiCodeExecutionCritique:
-    def __init__(self, original_csv, preprocessed_csv):
+class PreprocessorCritique:
+    def __init__(self, original_csv, preprocessed_csv, compare_columns):
         self.original_df = pd.read_csv(original_csv)
         self.processed_df = pd.read_csv(preprocessed_csv)
-        genai.configure(api_key=OOGLE_API_KEY)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.compare_columns = compare_columns
 
-    def _clean_code_response(self, response_text):
-        code = response_text.strip()
-        if "```python" in code:
-            code = code.split("```python")[1].split("```")[0]
-        elif "```" in code:
-            code = code.split("```")[1].split("```")[0]
-        return code.strip()
+    def compare_distribution(self):
+        distribution_result = {}
 
-    def _validate_generated_code(self, code):
-        banned = ['import os', 'import sys', 'exec(', 'eval(', 'open(', '__import__', 'subprocess']
-        return not any(word in code for word in banned)
+        for column, col_type in self.compare_columns.items():
+            dist_res = "Error"
+            reason = "Not evaluated"
 
-    def generate_and_run_code(self, column, orig_data, proc_data):
-        prompt = f"""
-        You are a data analyst. Compare whether the original and processed columns come from the same distribution.
-
-        original = {orig_data[:10].tolist()}
-        processed = {proc_data[:10].tolist()}
-        len_original = {len(orig_data)}, len_processed = {len(proc_data)}
-
-        Requirements:
-        1. Use appropriate statistical tests (e.g., t-test, KS test, Mann-Whitney U).
-        2. Consider statistical significance and effect size.
-        3. Set `distribution_result` to "Same" or "Different".
-        4. Set `reason` to a string explaining your reasoning briefly.
-        5. Use the variables `original` and `processed` already defined.
-        6. Only return valid Python code. No markdown or explanation outside code.
-        """
-
-        for attempt in range(3):
             try:
-                response = self.model.generate_content(prompt)
-                code = self._clean_code_response(response.text)
-                if not code or not self._validate_generated_code(code):
-                    continue
+                original = self.original_df[column].dropna()
+                processed = self.processed_df[column].dropna()
 
-                safe_builtins = {
-                    "abs": abs, "min": min, "max": max, "len": len, "print": print, "__import__": __import__
-                }
+                if col_type == "numerical continuous":
+                    stat, p_value = stats.ks_2samp(original, processed)
+                    dist_res = "Same" if p_value > 0.05 else "Different"
+                    reason = f"KS test p-value = {p_value:.4f}"
 
-                exec_env = {
-                    "original": orig_data,
-                    "processed": proc_data,
-                    "stats": stats,
-                    "np": np,
-                    "__builtins__": safe_builtins
-                }
+                elif col_type == "numerical discrete":
+                    stat, p_value = stats.mannwhitneyu(original, processed, alternative='two-sided')
+                    dist_res = "Same" if p_value > 0.05 else "Different"
+                    reason = f"Mann–Whitney U test p-value = {p_value:.4f}"
 
-                exec(code, exec_env)
+                elif col_type == "categorical nominal":
+                    original = original.astype(str)
+                    processed = processed.astype(str)
 
-                result = exec_env.get("distribution_result", "No result")
-                reason = exec_env.get("reason", "No explanation provided")
+                    orig_counts = np.unique(original, return_counts=True)
+                    proc_counts = np.unique(processed, return_counts=True)
 
-                return result, reason
+                    categories = list(set(orig_counts[0]) | set(proc_counts[0]))
+                    orig_freq = [dict(zip(*orig_counts)).get(cat, 0) for cat in categories]
+                    proc_freq = [dict(zip(*proc_counts)).get(cat, 0) for cat in categories]
+
+                    stat, p_value = stats.chisquare(f_obs=orig_freq, f_exp=proc_freq)
+                    dist_res = "Same" if p_value > 0.05 else "Different"
+                    reason = f"Chi-square test p-value = {p_value:.4f}"
+
+                elif col_type == "categorical ordinal":
+                    original = original.astype(str)
+                    processed = processed.astype(str)
+
+                    unique_values = sorted(set(original) | set(processed))
+                    value_to_rank = {val: rank for rank, val in enumerate(unique_values)}
+
+                    original_ranked = np.array([value_to_rank[val] for val in original])
+                    processed_ranked = np.array([value_to_rank[val] for val in processed])
+
+                    stat, p_value = stats.mannwhitneyu(original_ranked, processed_ranked, alternative='two-sided')
+                    dist_res = "Same" if p_value > 0.05 else "Different"
+                    reason = f"Mann–Whitney U test (ordinal) p-value = {p_value:.4f}"
+
+                else:
+                    dist_res = "Error"
+                    reason = f"Unsupported data type: {col_type}"
+
             except Exception as e:
-                logger.warning(f"Attempt {attempt+1} failed: {e}")
-                time.sleep(0.5)
+                dist_res = "Error"
+                reason = str(e)
 
-        return "Error", "Code execution failed"
+            distribution_result[column] = {"result": dist_res, "reason": reason}
 
-    def run_comparison(self):
-        original_cols = set(self.original_df.columns)
-        processed_cols = set(self.processed_df.columns)
-
-        common_cols = list(original_cols & processed_cols)
-        missing_cols = list(original_cols - processed_cols)
-
-        results = []
-
-        for col in common_cols:
-            orig_col = self.original_df[col].dropna()
-            proc_col = self.processed_df[col].dropna()
-
-            if len(orig_col) < 10 or len(proc_col) < 10:
-                results.append({
-                    "column": col,
-                    "analysed": "Insufficient data",
-                    "reason": "Not enough data points to perform comparison"
-                })
-            else:
-                result, reason = self.generate_and_run_code(col, orig_col.values, proc_col.values)
-                results.append({
-                    "column": col,
-                    "analysed": result,
-                    "reason": reason
-                })
-
-        return pd.DataFrame(results), missing_cols
-
-
-# Example usage
-if __name__ == "__main__":
-    api_key = "AIzaSyApgtd8xbx5wcYSlcUpWnKkEFfcqvrsX_A"  # 🔐 Replace this with your valid Gemini API key
-    checker = GeminiCodeExecutionCritique(
-        original_csv="/content/IRIS.csv",
-        preprocessed_csv="/content/IRIS_pre.csv",
-        api_key=api_key
-    )
-
-    result_df, missing_columns = checker.run_comparison()
-
-    print("\n🔍 Final Analysis:\n")
-    for _, row in result_df.iterrows():
-        print(f"📊 Column: {row['column']}")
-        print(f"   ➤ Analysed: {row['analysed']}")
-        print(f"   💬 Reason  : {row['reason']}\n")
-
-    print("\n🧾 Summary Table:\n")
-    print(result_df.to_string(index=False))
-
-    if missing_columns:
-        print(f"\n⚠️ Unnecessary columns skipped: {set(missing_columns)}")
-    else:
-        print("\n✅ All columns in the original file were present in the preprocessed file.")
+        return distribution_result
