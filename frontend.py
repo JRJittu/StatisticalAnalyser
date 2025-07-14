@@ -30,6 +30,7 @@ if uploaded_file:
                 data_context = "General statistical analysis"
 
             combined_result_file = core_agent.analyse_dataset(file_path, upload_file_name, data_context)
+
             st.success("Analysis completed!")
             st.session_state['combined_result_file'] = combined_result_file
 
