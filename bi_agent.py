@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 from kb_statistical import StatisticalKnowledgeBase
 import utils
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY3")

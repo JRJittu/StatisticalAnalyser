@@ -4,14 +4,17 @@ import faiss
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 import os
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+from dotenv import load_dotenv
+
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY1")
 
 class QueryAgent:
     def __init__(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
-            combined_result_text = f.read()
+            self.combined_result_text = f.read()
 
-        self.texts = self.split_text(combined_result_text, chunk_size=500, overlap=50)
+        self.texts = self.split_text(self.combined_result_text, chunk_size=500, overlap=50)
 
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
         embeddings = self.embedding_model.encode(self.texts)
@@ -35,12 +38,17 @@ class QueryAgent:
 
         retrieved_chunks = [self.texts[i] for i in I[0]]
         context = "\n\n".join(retrieved_chunks)
+        print("contex: ", context)
 
         prompt = f"""Answer the question based on the following statistical analysis context:
 
-        {context}
+        {self.combined_result_text}
 
         Question: {query}
         Answer:"""
         response = self.llm_model.generate_content(prompt)
         return response.text
+
+# agent = QueryAgent("uploads/IRIS_result.txt")
+# response = agent.get_answer("What is the mean of sepal length?")
+# print("\nGemini Response:\n", response)

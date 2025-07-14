@@ -5,7 +5,9 @@ import numpy as np
 import scipy.stats as stats
 import scipy as scipy
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 import utils
 from kb_preprocess import PreprocessorKB
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY1")
@@ -199,6 +201,7 @@ class PreprocessorAgent:
             - Remove features that are irrelevant, redundant, or not useful for modeling.
             - Provide an updated dictionary of column names with their types after removing the unnecessary features.
             - Remove date and time related columns if any
+            - Do NOT remove columns that are essential for analysis
 
             Input:
             Column Data Types: {json.dumps(column_data_type, indent=2)}

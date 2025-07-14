@@ -2,9 +2,11 @@ import google.generativeai as genai
 import pandas as pd
 import os
 import json
+from dotenv import load_dotenv
 
+load_dotenv()
 
-def detect_datatypes(df, model):
+def detect_datatypes(df):
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY1")
     genai.configure(api_key=GOOGLE_API_KEY)
     model = genai.GenerativeModel('gemini-2.0-flash')

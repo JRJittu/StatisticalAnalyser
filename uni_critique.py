@@ -4,14 +4,16 @@ import numpy as np
 from typing import Dict, Tuple, Any
 import google.generativeai as genai
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 from uni_agent import UnivariateAnalyzer
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY2")
 
 class UniCritique:
     def __init__(self, knowledge_base):
         self.knowledge_base = knowledge_base
-        self.uni_agent = UnivariateAnalyzer(self.knowledge_base, GOOGLE_API_KEY)
+        self.uni_agent = UnivariateAnalyzer(self.knowledge_base)
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
