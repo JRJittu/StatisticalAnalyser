@@ -11,33 +11,32 @@ st.title("Automated Statistical Analysis using LLM")
 
 uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
 
-# if uploaded_file:
-#     upload_file_name = uploaded_file.name
-#     file_path = os.path.join(UPLOAD_DIR, upload_file_name)
-#     with open(file_path, "wb") as f:
-#         f.write(uploaded_file.getbuffer())
+if uploaded_file:
+    upload_file_name = uploaded_file.name
+    file_path = os.path.join(UPLOAD_DIR, upload_file_name)
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
 
-#     st.success("File uploaded successfully!")
+    st.success("File uploaded successfully!")
 
-#     data_context = st.text_input("Provide a data context or description of the dataset (optional):")
+    data_context = st.text_input("Provide a data context or description of the dataset (optional):")
 
-#     if st.button("Run Analysis"):
-#         try:
-#             st.write("Analyzing the CSV with Core Agent...")
-#             core_agent = CoreAgent()
+    if st.button("Run Analysis"):
+        try:
+            st.write("Analyzing the CSV with Core Agent...")
+            core_agent = CoreAgent()
 
-#             if not data_context.strip():
-#                 data_context = "General statistical analysis"
+            if not data_context.strip():
+                data_context = "General statistical analysis"
 
-#             combined_result_file = core_agent.analyse_dataset(file_path, upload_file_name, data_context)
+            combined_result_file = core_agent.analyse_dataset(file_path, upload_file_name, data_context)
 
-#             st.success("Analysis completed!")
-#             st.session_state['combined_result_file'] = combined_result_file
+            st.success("Analysis completed!")
+            st.session_state['combined_result_file'] = combined_result_file
 
-#         except Exception as e:
-#             st.error(f"Error analyzing file: {str(e)}")
+        except Exception as e:
+            st.error(f"Error analyzing file: {str(e)}")
 
-st.session_state['combined_result_file'] = 'uploads/IRIS_result.txt'
 if 'combined_result_file' in st.session_state:
     st.write("You can now query the analysis results:")
     query = st.text_input("Enter your query:")
