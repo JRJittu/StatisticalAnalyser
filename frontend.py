@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 from core_agent import CoreAgent
+from query_agent import QueryAgent
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -18,18 +19,32 @@ if uploaded_file:
 
     st.success("File uploaded successfully!")
 
-    # try:
-    #     st.write("Analyzing the CSV with Core Agent...")
-    #     analysis_result = CoreAgent.analyse_dataset(file_path)
+    data_context = st.text_input("Provide a data context or description of the dataset (optional):")
 
-    #     st.subheader("Summary Statistics")
-    #     st.json(analysis_result["summary_statistics"])
+    if st.button("Run Analysis"):
+        try:
+            st.write("Analyzing the CSV with Core Agent...")
+            core_agent = CoreAgent()
 
-    #     st.subheader("Missing Values")
-    #     st.json(analysis_result["missing_values"])
+            if not data_context.strip():
+                data_context = "General statistical analysis"
 
-    #     st.info(f"Total Rows: {analysis_result['row_count']}")
-    #     st.info(f"Total Columns: {analysis_result['column_count']}")
+            combined_result_file = core_agent.analyse_dataset(file_path, upload_file_name, data_context)
+            st.success("Analysis completed!")
+            st.session_state['combined_result_file'] = combined_result_file
 
-    # except Exception as e:
-    #     st.error(f"Error analyzing file: {str(e)}")
+        except Exception as e:
+            st.error(f"Error analyzing file: {str(e)}")
+
+if 'combined_result_file' in st.session_state:
+    st.write("You can now query the analysis results:")
+    query = st.text_input("Enter your query:")
+
+    if query:
+        try:
+            query_agent = QueryAgent(file_path=st.session_state['combined_result_file'])
+            answer = query_agent.get_answer(query)
+            st.markdown("### Answer:")
+            st.write(answer)
+        except Exception as e:
+            st.error(f"Error answering query: {str(e)}")

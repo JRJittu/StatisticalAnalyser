@@ -28,15 +28,19 @@ class CoreAgent:
 
     def analyse_dataset(self, file_path: str, file_name, data_context: str):
         self.file_path = file_path
+        self.file_name = file_name
         self.dataset = pd.read_csv(file_path)
         self.dataset_pre = None
         self.column_data_type = type_detector.detect_datatypes(self.dataset, model)
         print("\ntype detector: ", self.column_data_type)
     
-        self.data_preprocessing(self.dataset, file_name, data_context)
+        self.data_preprocessing(self.dataset, self.file_name, data_context)
         self.univariate_analysis()
         self.bivariate_analysis()
-        
+        print("\n\nANALYSIS DONE. SENDING TO QUERY AGENT\n\n")
+        self.combine_result()
+
+        return self.result_output_path
 
     def data_preprocessing(self, dataset: pd.DataFrame, file_name: str, data_context: str):
         preprocess_agent = PreprocessorAgent(self.preprocess_kb, GOOGLE_API_KEY)
@@ -78,20 +82,25 @@ class CoreAgent:
 
     def univariate_analysis(self):
         uni_analyser = UnivariateAnalyzer(self.stat_kb, GOOGLE_API_KEY)
+        uni_critique = UniCritique(self.stat_kb, GOOGLE_API_KEY)
         self.uni_desc_result = {}
         self.uni_visual_result = {}
         self.uni_inferential_result = {}
 
         for col, col_type in self.selected_data_types.items():
             desc_result, vis_result, inf_result = uni_analyser.analyze(self.dataset_pre[col], col_type, self.metadata[col], col)
-            self.uni_desc_result[col] = desc_result
-            self.uni_visual_result[col] = vis_result
-            self.uni_inferential_result[col] = inf_result
+
+            desc_result_v, vis_result_v, inf_result_v = uni_critique.validate(self.dataset_pre[col],col_type, self.metadata[col], col, desc_result, vis_result, inf_result)
+
+            self.uni_desc_result[col] = desc_result_v
+            self.uni_visual_result[col] = vis_result_v
+            self.uni_inferential_result[col] = inf_result_v
 
 
     def bivariate_analysis(self):
-        bi_selector = BivariateSelectorAgent(self.selected_data_types, GOOGLE_API_KEY)
+        bi_selector = BivariateSelectorAgent(self.selected_data_types, BiCritique)
         bi_analyser = BivariateAnalyzer(self.stat_kb, GOOGLE_API_KEY)
+        bi_critique = BiCritique(self.stat_kb, GOOGLE_API_KEY)
 
         self.selected_pairs = bi_selector.select_bivariate_pairs(self.processed_file_path)
 
@@ -108,7 +117,39 @@ class CoreAgent:
                 self.dataset_pre[col2], self.selected_data_types[col2], self.metadata[col2], col2,
             )
 
+            desc_result_v, vis_result_v, inf_result_v = bi_critique.validate(
+                self.dataset_pre[col1], self.selected_data_types[col1], self.metadata[col1], col1,
+                self.dataset_pre[col2], self.selected_data_types[col2], self.metadata[col2], col2,
+                desc_result, vis_result, inf_result
+            )
+
             combine = col1 + "-" + col2
-            self.bi_desc_result[combine] = desc_result 
-            self.bi_visual_result[combine] = vis_result 
-            self.bi_inferential_result[combine] = inf_result
+            self.bi_desc_result[combine] = desc_result_v
+            self.bi_visual_result[combine] = vis_result_v
+            self.bi_inferential_result[combine] = inf_result_v
+
+    def combine_result(self):
+        self.combined = ""
+
+        self.combined += "### Preprocessing Outlier Results:\n"
+        self.combined += json.dumps(self.outlier_result, indent=2)
+        self.combined += "\n\n### Preprocessing Distribution Comparison:\n"
+        self.combined += json.dumps(self.distribution_result, indent=2)
+
+        self.combined += "\n\n### Univariate Descriptive Results:\n"
+        self.combined += json.dumps(self.uni_desc_result, indent=2)
+        self.combined += "\n\n### Univariate Visual Results:\n"
+        self.combined += json.dumps(self.uni_visual_result, indent=2)
+        self.combined += "\n\n### Univariate Inferential Results:\n"
+        self.combined += json.dumps(self.uni_inferential_result, indent=2)
+
+        self.combined += "\n\n### Bivariate Descriptive Results:\n"
+        self.combined += json.dumps(self.bi_desc_result, indent=2)
+        self.combined += "\n\n### Bivariate Visual Results:\n"
+        self.combined += json.dumps(self.bi_visual_result, indent=2)
+        self.combined += "\n\n### Bivariate Inferential Results:\n"
+        self.combined += json.dumps(self.bi_inferential_result, indent=2)
+
+        self.result_output_path = os.path.join(UPLOAD_DIR, f"{self.file_name}_result.txt")
+        with open(self.result_output_path, "w", encoding="utf-8") as f:
+            f.write(self.combined)

@@ -6,11 +6,13 @@ import google.generativeai as genai
 import os
 
 from kb_statistical import StatisticalKnowledgeBase
+from uni_agent import UnivariateAnalyzer
 from utils import util_functions
 
 class UniCritique:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY):
+    def __init__(self, knowledge_base, GOOGLE_API_KEY):
         self.knowledge_base = knowledge_base
+        self.uni_agent = UnivariateAnalyzer(self.knowledge_base, GOOGLE_API_KEY)
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
@@ -20,291 +22,158 @@ class UniCritique:
             raise ValueError(f"No statistical knowledge found for variable type: {var_type}")
         return json.loads(doc)
 
-    def validate_descriptive_statistics(self, data_column: pd.Series, var_type: str, generated_code: str) -> Tuple[bool, str]:
-        """
-        Validate descriptive statistics against knowledge base recommendations
-        """
+    def validate(self, data_column: pd.Series, var_type: str, metadata: str, column_name: str,  desc_results, visual_result, infer_result):
+        self.knowledge = self.get_knowledge_for_variable(var_type)
+        self.desc_result = desc_results
+        self.visual_result = visual_result
+        self.infer_result = infer_result
+        self.metadata = metadata
+        self.data_column = data_column
+        self.column_name = column_name
+        self.uni_agent.fetch_knowledge(var_type)
+
+        self.validate_descriptive_statistics()
+        self.validate_visualizations()
+        self.validate_inferential_statistics()
+
+        return self.desc_result, self.visual_result, self.infer_result
+
+
+    def validate_descriptive_statistics(self):
         try:
-            knowledge = self.get_knowledge_for_variable(var_type)
-
-            # Execute the generated code to get results
-            local_vars = {'data_column': data_column}
-            exec(generated_code, {}, local_vars)
-
-            result = local_vars.get('result')
-            if result is None:
-                return False, "Generated code did not produce 'result' variable"
-
-            # Convert to serializable format
-            serialized_result = self.convert_to_serializable(result)
-
-            # Get knowledge base requirements
-            priority_tests = knowledge.get("priority_tests", [])
-            descriptive_stats = knowledge.get("descriptive", {}).get("statistics", [])
+            priority_tests = self.knowledge.get("priority_tests", [])
+            descriptive_stats = self.knowledge.get("descriptive", {})
+            retries = 3
 
             validation_prompt = f"""
             You are a statistical validation expert. Validate whether the calculated statistics match the knowledge base requirements.
 
             Knowledge Base Requirements:
             Priority Tests: {json.dumps(priority_tests, indent=2)}
-            Descriptive Statistics: {json.dumps(descriptive_stats, indent=2)}
+            Descriptive statistics along with application criteria and selection criteria:
+            {json.dumps(descriptive_stats, indent=2)}
 
-            Calculated Results:
-            {json.dumps(serialized_result, indent=2)}
+            Selected descriptive tests and their results:
+            {json.dumps(self.desc_result, indent=2)}
 
-            Data Characteristics:
-            - Sample size: {len(data_column)}
-            - Data type: {var_type}
-            - Contains nulls: {data_column.isnull().any()}
+            Metadata:
+            {self.metadata}
 
             Instructions:
             - Check if all required priority tests from knowledge base are calculated
-            - Check if all required descriptive statistics from knowledge base are calculated
-            - Verify the calculations are appropriate for the data characteristics
-            - Return ONLY a JSON with this structure:
-            {{
-                "validation_passed": true/false,
-                "missing_tests": ["list of missing priority tests"],
-                "missing_statistics": ["list of missing descriptive statistics"],
-                "issues": ["list of any calculation issues"],
-                "summary": "brief summary of validation result"
-            }}
+            - Check if appropriate descriptive statistics from knowledge base are calculated
+            - Verify if the calculations are appropriate for the data characteristics
+            - Also validate the codes if any in the descriptive statistics result are correct. If code contains any variables such as `data_column` then don't consider it an error
+            - Return only string "TRUE" if all results are correct
+            - If there is any error such as code error or incorrect statistical method chosen, return ONLY that error string
+            - Do not return a response of more than 100 words
             """
 
-            response = self.model.generate_content(validation_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
-            validation_result = json.loads(json_string)
+            for i in range(retries):
+                print("\nDescriptive statistics retry: ", i+1)
+                response = self.model.generate_content(validation_prompt)
+                validation_feedback = response.text.strip()
 
-            return validation_result["validation_passed"], validation_result["summary"]
+                if validation_feedback.upper() == "TRUE":
+                    print("\nUnivariate Descriptive Result Validated")
+                else:
+                    self.desc_result = self.uni_agent.perform_descriptive_stats(self.data_column, self.metadata, validation_feedback)
 
         except Exception as e:
             return False, f"Validation error: {str(e)}"
 
-    def validate_visualizations(self, data_column: pd.Series, var_type: str,
-                               desc_results: Dict, selected_visualizations: Dict) -> Tuple[bool, str]:
-        """
-        Validate visualizations against knowledge base recommendations
-        """
+    def validate_visualizations(self):
         try:
-            knowledge = self.get_knowledge_for_variable(var_type)
-            visualization_options = knowledge.get("visualization", {})
+            visualizations = self.knowledge.get("visualization", {})
+            retries = 3
 
             validation_prompt = f"""
             You are a visualization validation expert. Validate whether the selected visualizations are appropriate.
 
-            Knowledge Base Visualization Options:
-            {json.dumps(visualization_options, indent=2)}
+            Knowledge Base Visualization options along with their selection criteria:
+            {json.dumps(visualizations, indent=2)}
 
             Selected Visualizations:
-            {json.dumps(selected_visualizations, indent=2)}
+            {json.dumps(self.visual_result, indent=2)}
 
             Descriptive Statistics Results:
-            {json.dumps(desc_results, indent=2)}
+            {json.dumps(self.desc_result, indent=2)}
 
-            Data Characteristics:
-            - Sample size: {len(data_column)}
-            - Data range: {data_column.min()} to {data_column.max()}
-            - Data type: {var_type}
+            Metadata:
+            {self.metadata}
 
             Instructions:
-            - Check if selected visualizations are available in knowledge base options
+            - Check if the selected visualizations are part of the knowledge base options
             - Verify if selections are appropriate based on data characteristics and descriptive statistics
-            - Consider sample size, distribution shape, outliers, etc.
-            - Return ONLY a JSON with this structure:
-            {{
-                "validation_passed": true/false,
-                "inappropriate_selections": ["list of inappropriate visualization choices"],
-                "better_alternatives": ["list of better visualization options from knowledge base"],
-                "reasons": ["reasons why current selections are inappropriate or appropriate"],
-                "summary": "brief summary of validation result"
-            }}
+            - If the selection contains more than two visualizations, flag it as an error. If one or two are selected, it's acceptable.
+            - Consider sample size, distribution shape, presence of outliers, etc.
+            - Return only the string "TRUE" if the selected visualizations are correct
+            - If there is a mistake in the selected visualization methods, return ONLY that error string
+            - Do not return a response longer than 100 words
             """
 
-            response = self.model.generate_content(validation_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
-            validation_result = json.loads(json_string)
+            for attempt in range(retries):
+                print("\nVisualization validation retry:", attempt + 1)
+                response = self.model.generate_content(validation_prompt)
+                validation_feedback = response.text.strip()
 
-            return validation_result["validation_passed"], validation_result["summary"]
+                if validation_feedback.upper() == "TRUE":
+                    print("\nUnivariate Visualization Result Validated")
+                else:
+                    self.visual_result = self.uni_agent.perform_visualization(self.desc_result, self.column_name, validation_feedback)
 
         except Exception as e:
             return False, f"Visualization validation error: {str(e)}"
 
-    def validate_inferential_statistics(self, data_column: pd.Series, var_type: str,
-                                      desc_results: Dict, selected_tests: Dict,
-                                      metadata: str) -> Tuple[bool, str]:
-        """
-        Validate inferential statistics against knowledge base recommendations
-        """
+
+
+    def validate_inferential_statistics(self):
         try:
-            knowledge = self.get_knowledge_for_variable(var_type)
-            inferential_options = knowledge.get("inferential", {})
+            inferential_options = self.knowledge.get("inferential", {})
             available_tests = inferential_options.get("tests", [])
             selection_criteria = inferential_options.get("selection_criteria", [])
+            application_criteria = inferential_options.get("application_criteria", [])
+            retries = 3
 
             validation_prompt = f"""
-            You are an inferential statistics validation expert. Validate whether the selected tests are appropriate.
+            You are an inferential statistics validation expert. Validate whether the selected inferential tests for the given column are appropriate using the knowledge provided.
 
             Knowledge Base Inferential Tests:
             Available Tests: {json.dumps(available_tests, indent=2)}
             Selection Criteria: {json.dumps(selection_criteria, indent=2)}
+            Application Criteria: {json.dumps(application_criteria, indent=2)}
 
-            Selected Tests:
-            {json.dumps(selected_tests, indent=2)}
+            Selected inferential tests and their results on the given column:
+            {json.dumps(self.infer_result, indent=2)}
 
-            Descriptive Statistics Results:
-            {json.dumps(desc_results, indent=2)}
+            Descriptive Statistics Results for selecting inferential tests:
+            {json.dumps(self.desc_result, indent=2)}
 
-            Metadata: {metadata}
-
-            Data Characteristics:
-            - Sample size: {len(data_column)}
-            - Data type: {var_type}
+            Metadata:
+            {self.metadata}
 
             Instructions:
-            - Check if selected tests are available in the knowledge base
-            - Verify if test selections meet the selection criteria from knowledge base
+            - Check if the selected tests are part of the knowledge base
+            - Verify if test selections meet the selection criteria
             - Consider data characteristics (normality, sample size, etc.) from descriptive results
-            - Validate that assumptions for selected tests are met
+            - Only validate the **results of inferential statistics**, not recomputation
+            - Also validate any code snippets within the inferential results; if code includes variables like `data_column`, ignore as error
             - Check if hypotheses are properly formulated given the metadata
-            - Return ONLY a JSON with this structure:
-            {{
-                "validation_passed": true/false,
-                "inappropriate_tests": ["list of inappropriate test selections"],
-                "assumption_violations": ["list of assumption violations"],
-                "better_alternatives": ["list of better test options from knowledge base"],
-                "hypothesis_issues": ["issues with hypothesis formulation"],
-                "summary": "brief summary of validation result"
-            }}
+            - Return only the string "TRUE" if all results are correct
+            - If there is an error (code, methodology, test selection, etc.), return ONLY that error string
+            - Do not return a response longer than 100 words
             """
 
-            response = self.model.generate_content(validation_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
-            validation_result = json.loads(json_string)
+            for i in range(retries):
+                print("\nDescriptive statistics retry: ", i+1)
+                response = self.model.generate_content(validation_prompt)
+                validation_feedback = response.text.strip()
 
-            return validation_result["validation_passed"], validation_result["summary"]
+                if validation_feedback.upper() == "TRUE":
+                    print("\nUnivariate Inferential Result Validated")
+                    return
+                else:
+                    self.infer_result = self.uni_agent.perform_inferential_stats(self.data_column, self.desc_result, self.metadata, validation_feedback)
 
         except Exception as e:
             return False, f"Inferential validation error: {str(e)}"
-
-    def comprehensive_validate(self, data_column: pd.Series, var_type: str,
-                             generated_code: str, desc_results: Dict,
-                             selected_visualizations: Dict, selected_tests: Dict,
-                             metadata: str, max_retries: int = 3) -> bool:
-        """
-        Perform comprehensive validation of the entire analysis
-        """
-        print("\n" + "="*60)
-        print("STARTING KNOWLEDGE BASE VALIDATION")
-        print("="*60)
-
-        for attempt in range(max_retries):
-            if attempt > 0:
-                print(f"\n>>> RETRY ATTEMPT {attempt} <<<")
-
-            all_passed = True
-
-            # Validate descriptive statistics
-            print("\n🔍 VALIDATING DESCRIPTIVE STATISTICS...")
-            desc_passed, desc_summary = self.validate_descriptive_statistics(
-                data_column, var_type, generated_code
-            )
-
-            if desc_passed:
-                print("✅ Descriptive statistics validation PASSED")
-            else:
-                print("❌ Descriptive statistics validation FAILED")
-                print(f"   {desc_summary}")
-                all_passed = False
-
-            # Validate visualizations
-            print("\n🔍 VALIDATING VISUALIZATIONS...")
-            viz_passed, viz_summary = self.validate_visualizations(
-                data_column, var_type, desc_results, selected_visualizations
-            )
-
-            if viz_passed:
-                print("✅ Visualization validation PASSED")
-            else:
-                print("❌ Visualization validation FAILED")
-                print(f"   {viz_summary}")
-                all_passed = False
-
-            # Validate inferential statistics
-            print("\n🔍 VALIDATING INFERENTIAL STATISTICS...")
-            inf_passed, inf_summary = self.validate_inferential_statistics(
-                data_column, var_type, desc_results, selected_tests, metadata
-            )
-
-            if inf_passed:
-                print("✅ Inferential statistics validation PASSED")
-            else:
-                print("❌ Inferential statistics validation FAILED")
-                print(f"   {inf_summary}")
-                all_passed = False
-
-            if all_passed:
-                print("\n✅ All validations PASSED")
-                return True
-            else:
-                if attempt < max_retries - 1:
-                    print(f"\n❌ Validation failed. Retrying analysis... (Attempt {attempt + 2}/{max_retries})")
-                else:
-                    print(f"\n❌ Analysis validation failed after {max_retries} attempts.")
-
-        return False
-
-    def validate_with_recommendations(self, data_column: pd.Series, var_type: str,
-                                    analysis_results: Dict) -> Dict[str, Any]:
-        """
-        Validate analysis and provide specific recommendations for improvement
-        """
-        try:
-            knowledge = self.get_knowledge_for_variable(var_type)
-
-            recommendation_prompt = f"""
-            You are a statistical analysis advisor. Provide specific recommendations for improving the analysis.
-
-            Knowledge Base for {var_type}:
-            {json.dumps(knowledge, indent=2)}
-
-            Current Analysis Results:
-            {json.dumps(analysis_results, indent=2)}
-
-            Data Characteristics:
-            - Sample size: {len(data_column)}
-            - Data range: {data_column.min()} to {data_column.max()}
-            - Has nulls: {data_column.isnull().any()}
-
-            Instructions:
-            - Compare current analysis with knowledge base recommendations
-            - Identify what's missing or inappropriate
-            - Provide specific, actionable recommendations
-            - Return ONLY a JSON with this structure:
-            {{
-                "overall_assessment": "EXCELLENT/GOOD/NEEDS_IMPROVEMENT/POOR",
-                "strengths": ["list of what was done well"],
-                "weaknesses": ["list of issues or missing elements"],
-                "specific_recommendations": [
-                    {{
-                        "category": "descriptive/visualization/inferential",
-                        "issue": "description of the issue",
-                        "recommendation": "specific action to take",
-                        "priority": "HIGH/MEDIUM/LOW"
-                    }}
-                ],
-                "summary": "overall summary of the analysis quality"
-            }}
-            """
-
-            response = self.model.generate_content(recommendation_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
-            recommendations = json.loads(json_string)
-
-            return recommendations
-
-        except Exception as e:
-            return {
-                "overall_assessment": "ERROR",
-                "error": str(e),
-                "summary": "Could not generate recommendations due to error"
-            }
