@@ -8,10 +8,11 @@ from scipy import stats
 import os
 
 from kb_statistical import StatisticalKnowledgeBase
-from utils import util_functions
+import utils
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY3")
 
 class BivariateAnalyzer:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY):
+    def __init__(self, knowledge_base: StatisticalKnowledgeBase):
         self.knowledge_base = knowledge_base
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
@@ -26,7 +27,6 @@ class BivariateAnalyzer:
         self.knowledge = json.loads(doc)
 
     def analyze(self, data_column1: pd.Series, var_type1: str, col_name1: str, metadata1: str, data_column2: pd.Series, var_type2: str, col_name2: str, metadata2: str):
-        combined_var_type = f"{var_type1} + {var_type2}"
         self.fetch_knowledge(var_type1, var_type2)
 
         desc_result = self.perform_descriptive_stats(data_column1, metadata1, data_column2, metadata2)
@@ -76,7 +76,7 @@ class BivariateAnalyzer:
             """
 
             response = self.model.generate_content(descriptive_prompt)
-            python_code = util_functions.extract_json_from_response(response.text)
+            python_code = utils.extract_json_from_response(response.text)
 
             local_vars = {
                 'data_column1': data_column1,
@@ -85,8 +85,7 @@ class BivariateAnalyzer:
             exec(python_code, {}, local_vars)
 
             intermediate_result = local_vars.get('result')
-            serializable_result = util_functions.convert_to_serializable(intermediate_result)
-            print("serial: ", serializable_result)
+            serializable_result = utils.convert_to_serializable(intermediate_result)
 
             reasoning_prompt = f"""
                 You are a statistical reasoning assistant. Based on the following bivariate test results, selection criteria, and application criteria, finalize the preferred statistics and summarize key findings.
@@ -131,13 +130,9 @@ class BivariateAnalyzer:
             """
 
             response = self.model.generate_content(reasoning_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
 
             descriptive_result = json.loads(json_string)
-            print("\nFinal Bivariate Descriptive Statistics Result:")
-            for k, v in descriptive_result["statistics_results"].items():
-                print(k, " : ", v)
-
             return descriptive_result
         except Exception as e:
             return {
@@ -193,14 +188,10 @@ class BivariateAnalyzer:
                 }}
             """
 
-            print("\nBivariate Visualization Suggestions:")
             response = self.model.generate_content(prompt)
 
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
             visualization_suggestions = json.loads(json_string)
-
-            for k, v in visualization_suggestions.items():
-                print(k, " : ", v)
 
             local_vars = {
                 'plt': plt,
@@ -275,7 +266,7 @@ class BivariateAnalyzer:
             """
 
             response = self.model.generate_content(inferential_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
             inferential_results = json.loads(json_string)
 
             for test_name, test_details in inferential_results.items():
@@ -284,11 +275,9 @@ class BivariateAnalyzer:
                 exec(test_details['python_code'], local_vars)
                 result = local_vars.get('result')
 
-                print(f"\nExecuted Result for {test_name}: {result}")
                 inferential_results[test_name]['result'] = result
 
                 del inferential_results[test_name]['python_code']
-            print("\n\nCompleted Execution\n\n")
             conclusion_prompt = f"""
                 You are a statistical inference reasoning assistant.
 
@@ -320,12 +309,8 @@ class BivariateAnalyzer:
             """
 
             conclusion_response = self.model.generate_content(conclusion_prompt)
-            final_json_string = util_functions.extract_json_from_response(conclusion_response.text)
+            final_json_string = utils.extract_json_from_response(conclusion_response.text)
             final_inferential_results = json.loads(final_json_string)
-
-            print("\nFinal Inferential Statistics Results:")
-            for k, v in final_inferential_results.items():
-                print(k, " : ", v)
 
             return final_inferential_results
         except Exception as e:

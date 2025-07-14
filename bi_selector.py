@@ -5,7 +5,7 @@ from scipy.stats import pearsonr, chi2_contingency, ttest_ind, f_oneway
 import os
 import json
 
-from utils import util_functions
+import utils
 
 class BivariateSelectorAgent:
     def __init__(self, variable_types: dict, GOOGLE_API_KEY: str, max_pairs: int = 10, correlation_threshold: float = 0.3):
@@ -99,5 +99,5 @@ class BivariateSelectorAgent:
             return []
 
         gemini_response = self.ask_gemini_to_select_pairs(candidate_pairs, df)
-        selected_pairs = json.loads(self.extract_json_from_response(gemini_response))
+        selected_pairs = json.loads(utils.extract_json_from_response(gemini_response))
         return selected_pairs["selected_pairs"]

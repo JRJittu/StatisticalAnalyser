@@ -6,11 +6,12 @@ import scipy.stats as stats
 import scipy as scipy
 import os
 
-from utils import util_functions
+import utils
 from kb_preprocess import PreprocessorKB
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY1")
 
 class PreprocessorAgent:
-    def __init__(self, knowledge_base: PreprocessorKB, GOOGLE_API_KEY: str):
+    def __init__(self, knowledge_base: PreprocessorKB):
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
         self.knowledge_base = knowledge_base
@@ -40,7 +41,7 @@ class PreprocessorAgent:
         """
 
         response = self.model.generate_content(prompt)
-        metadata = util_functions.extract_json_from_response(response.text)
+        metadata = utils.extract_json_from_response(response.text)
         try:
             metadata1 = json.loads(metadata)
             return metadata1
@@ -78,7 +79,7 @@ class PreprocessorAgent:
         """
 
         response = self.model.generate_content(prompt_1)
-        prior_code = util_functions.extract_json_from_response(response.text)
+        prior_code = utils.extract_json_from_response(response.text)
         local_vars = {}
         try:
             exec(prior_code, {"np": np, "pd": pd, "stats": stats, "scipy": scipy, "data_column": data_column}, local_vars)
@@ -87,7 +88,7 @@ class PreprocessorAgent:
             return {"error": "Execution of prior test code failed."}
 
         raw_results = local_vars.get("results", {})
-        self.prior_test_res = util_functions.convert_to_serializable(raw_results)
+        self.prior_test_res = utils.convert_to_serializable(raw_results)
 
         outlier_methods = self.preprocess_knowledge.get('outlier_detection', [])
         if not outlier_methods:
@@ -117,7 +118,7 @@ class PreprocessorAgent:
             - Convert all NumPy or SciPy results into plain Python types using float() or int() if needed.
         """
         response2 = self.model.generate_content(prompt_2)
-        method_response = util_functions.extract_json_from_response(response2.text)
+        method_response = utils.extract_json_from_response(response2.text)
         selected_method_json = json.loads(method_response)
         outlier_vars = {}
         try:
@@ -133,7 +134,7 @@ class PreprocessorAgent:
         self.outlier_result = {
             "selected_method": selected_method_json.get("selected_method"),
             "reasoning": selected_method_json.get("reasoning"),
-            "outlier_indexes": util_functions.convert_to_serializable(outlier_vars.get('outlier_indexes', []))
+            "outlier_indexes": utils.convert_to_serializable(outlier_vars.get('outlier_indexes', []))
         }
 
         return self.outlier_result
@@ -170,7 +171,7 @@ class PreprocessorAgent:
         """
 
         response = self.model.generate_content(prompt)
-        response_json = json.loads(util_functions.extract_json_from_response(response.text))
+        response_json = json.loads(utils.extract_json_from_response(response.text))
         local_vars = {"data_column": data_column}
         try:
             exec(response_json["python_code"], {}, local_vars)
@@ -215,7 +216,7 @@ class PreprocessorAgent:
         """
 
         response = self.model.generate_content(prompt)
-        cleaned_json_text = util_functions.extract_json_from_response(response.text)
+        cleaned_json_text = utils.extract_json_from_response(response.text)
         try:
             cleaned_column_data_type = json.loads(cleaned_json_text)
             return cleaned_column_data_type

@@ -3,7 +3,11 @@ import pandas as pd
 import os
 import json
 
+
 def detect_datatypes(df, model):
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY1")
+    genai.configure(api_key=GOOGLE_API_KEY)
+    model = genai.GenerativeModel('gemini-2.0-flash')
     column_info = {}
     for col in df.columns:
         sample_values = df[col].dropna().head(10).tolist()

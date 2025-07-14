@@ -11,7 +11,7 @@ class QueryAgent:
         with open(file_path, 'r', encoding='utf-8') as f:
             combined_result_text = f.read()
 
-        self.texts = split_text(combined_result_text, chunk_size=500, overlap=50)
+        self.texts = self.split_text(combined_result_text, chunk_size=500, overlap=50)
 
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
         embeddings = self.embedding_model.encode(self.texts)
@@ -23,6 +23,12 @@ class QueryAgent:
         genai.configure(api_key=GOOGLE_API_KEY)
         self.llm_model = genai.GenerativeModel('gemini-2.0-flash')
 
+    def split_text(self, text, chunk_size=500, overlap=50):
+        chunks = []
+        for i in range(0, len(text), chunk_size - overlap):
+            chunks.append(text[i:i + chunk_size])
+        return chunks
+    
     def get_answer(self, query, k=3):
         query_embedding = self.embedding_model.encode([query])
         D, I = self.index.search(np.array(query_embedding), k=k)

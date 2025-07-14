@@ -31,7 +31,6 @@ class PreprocessorKB:
             metadatas=metadatas,
             ids=ids
         )
-        print("Imputation knowledge successfully stored in ChromaDB.")
 
     def search_knowledge(self, data_type):
         results = self.collection.query(

@@ -30,7 +30,6 @@ class StatisticalKnowledgeBase:
             metadatas=metadatas,
             ids=ids
         )
-        print("Knowledge successfully stored in ChromaDB.")
 
     def search_knowledge(self, no_of_variable, var_type):
         results = self.collection.query(

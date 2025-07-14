@@ -7,10 +7,11 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 from kb_statistical import StatisticalKnowledgeBase
-from utils import util_functions
+import utils
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY2")
 
 class UnivariateAnalyzer:
-    def __init__(self, knowledge_base: StatisticalKnowledgeBase, GOOGLE_API_KEY: str):
+    def __init__(self, knowledge_base: StatisticalKnowledgeBase):
         self.data = None
         self.var_type = None
         self.knowledge_base = knowledge_base
@@ -30,19 +31,6 @@ class UnivariateAnalyzer:
         vis_result = self.perform_visualization(data_column, desc_result, column_name)
         inf_result = self.perform_inferential_stats(data_column, desc_result, metadata)
         return desc_result, vis_result, inf_result
-
-    def analyze(self, data_column: pd.Series, var_type: str, metadata: str, column_name: str):
-        try:
-            self.data = data_column
-            self.var_type = var_type
-            self.fetch_knowledge(var_type)
-            desc_result = self.perform_descriptive_stats(data_column, metadata)
-            vis_result = self.perform_visualization(data_column, desc_result, column_name)
-            inf_result = self.perform_inferential_stats(data_column, desc_result, metadata)
-            return desc_result, vis_result, inf_result
-        except Exception as e:
-            print("Error in analyze:", e)
-            raise
 
     def fetch_knowledge(self, var_type):
         doc = self.knowledge_base.search_knowledge("univariate", var_type)
@@ -90,17 +78,13 @@ class UnivariateAnalyzer:
             """
 
             response = self.model.generate_content(descriptive_prompt)
-            python_code = util_functions.extract_json_from_response(response.text)
-
-            print("\nGenerated Python Code:\n", python_code)
+            python_code = utils.extract_json_from_response(response.text)
 
             local_vars = {'data_column': data_column}
             exec(python_code, {}, local_vars)
 
             intermediate_result = local_vars.get('result')
-            serializable_result = util_functions.convert_to_serializable(intermediate_result)
-            print("intermediate: ", intermediate_result)
-            print("serail: ", serializable_result)
+            serializable_result = utils.convert_to_serializable(intermediate_result)
 
             reasoning_prompt = f"""
             You are a statistical reasoning assistant. Based on the following test results, selection criteria, and application criteria, finalize the preferred statistics and summarize key findings.
@@ -143,7 +127,7 @@ class UnivariateAnalyzer:
             """
 
             response = self.model.generate_content(reasoning_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
 
             descriptive_result = json.loads(json_string)
             return descriptive_result
@@ -204,14 +188,10 @@ class UnivariateAnalyzer:
             - Do not return any explanations outside this JSON structure.
             """
 
-            print("\nVisualization Suggestions:")
             response = self.model.generate_content(prompt)
-            # print(response.text, "\n")
 
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
             visualization_suggestions = json.loads(json_string)
-            for k, v in visualization_suggestions.items():
-                print(k, " : ", v)
 
             local_vars = {'plt': plt, 'data_column': data_column}
 
@@ -285,7 +265,7 @@ class UnivariateAnalyzer:
             """
 
             response = self.model.generate_content(inferential_prompt)
-            json_string = util_functions.extract_json_from_response(response.text)
+            json_string = utils.extract_json_from_response(response.text)
             inferential_results = json.loads(json_string)
 
             for test_name, test_details in inferential_results.items():
@@ -293,7 +273,6 @@ class UnivariateAnalyzer:
                 exec(test_details['python_code'], local_vars)
                 result = local_vars.get('result')
 
-                print(f"\nExecuted Result for {test_name}: {result}")
                 inferential_results[test_name]['result'] = result
 
                 del inferential_results[test_name]['python_code']
@@ -330,12 +309,8 @@ class UnivariateAnalyzer:
             """
 
             conclusion_response = self.model.generate_content(conclusion_prompt)
-            final_json_string = util_functions.extract_json_from_response(conclusion_response.text)
+            final_json_string = utils.extract_json_from_response(conclusion_response.text)
             final_inferential_results = json.loads(final_json_string)
-
-            print("\nFinal Inferential Statistics Results:")
-            for k, v in final_inferential_results.items():
-                print(k, " : ", v)
 
             return final_inferential_results
         
