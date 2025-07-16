@@ -11,7 +11,7 @@ import utils
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY3")
 
 class BivariateSelectorAgent:
-    def __init__(self, variable_types: dict, max_pairs: int = 5, correlation_threshold: float = 0.3):
+    def __init__(self, variable_types: dict, max_pairs: int = 3, correlation_threshold: float = 0.3):
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.variable_types = variable_types

@@ -91,7 +91,7 @@ class CoreAgent:
 
         for col, col_type in self.selected_data_types.items():
             desc_result, vis_result, inf_result = uni_analyser.analyze(self.dataset_pre[col], col_type, self.metadata[col], col)
-            # desc_result_v, vis_result_v, inf_result_v = uni_critique.validate(self.dataset_pre[col],col_type, self.metadata[col], col, desc_result, vis_result, inf_result)
+            # desc_result, vis_result, inf_result= uni_critique.validate(self.dataset_pre[col],col_type, self.metadata[col], col, desc_result, vis_result, inf_result)
             
             self.uni_desc_result[col] = desc_result
             self.uni_visual_result[col] = vis_result
@@ -126,11 +126,11 @@ class CoreAgent:
             col2 = temp['pair'][1]
 
             desc_result, vis_result, inf_result = bi_analyser.analyze(
-                self.dataset_pre[col1], self.selected_data_types[col1], self.metadata[col1], col1,
-                self.dataset_pre[col2], self.selected_data_types[col2], self.metadata[col2], col2,
+                self.dataset_pre[col1], self.selected_data_types[col1], col1, self.metadata[col1], 
+                self.dataset_pre[col2], self.selected_data_types[col2], col2, self.metadata[col2],
             )
 
-            # desc_result_v, vis_result_v, inf_result_v = bi_critique.validate(
+            # desc_result, vis_result, inf_result = bi_critique.validate(
             #     self.dataset_pre[col1], self.selected_data_types[col1], self.metadata[col1], col1,
             #     self.dataset_pre[col2], self.selected_data_types[col2], self.metadata[col2], col2,
             #     desc_result, vis_result, inf_result

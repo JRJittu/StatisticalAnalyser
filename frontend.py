@@ -107,7 +107,7 @@ if 'combined_result_file' in st.session_state:
                         visuals = bi_vis[pair_key]
                         for vis_key, vis_info in visuals.items():
                             if isinstance(vis_info, dict):
-                                image_path = f"uploads/{pair_key}_vis{vis_key[-1]}.png"
+                                image_path = f"uploads/bi_{col1}_{col2}_vis{vis_key[-1]}.png"
                                 if os.path.exists(image_path):
                                     st.image(image_path, caption=f"{pair_key} - {vis_info.get('name', vis_key)}")
 

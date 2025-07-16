@@ -76,10 +76,10 @@ class UniCritique:
                 validation_feedback = response.text.strip()
                 print("validation_feedback:", validation_feedback)
                 if "TRUE" in validation_feedback.upper():
-                    print("Univariate Descriptive Result Validated")
+                    # print("Univariate Descriptive Result Validated")
                     return
                 else:
-                    print("Univariate Descriptive Result Not Validated")
+                    # print("Univariate Descriptive Result Not Validated")
                     self.desc_result = self.uni_agent.perform_descriptive_stats(self.data_column, self.metadata, validation_feedback)
 
         except Exception as e:
@@ -120,10 +120,10 @@ class UniCritique:
                 validation_feedback = response.text.strip()
                 print("validation_feedback:", validation_feedback)
                 if "TRUE" in validation_feedback.upper():
-                    print("Univariate Visualization Result Validated")
+                    # print("Univariate Visualization Result Validated")
                     return
                 else:
-                    print("Univariate Visualization Result Not Validated")
+                    # print("Univariate Visualization Result Not Validated")
                     self.visual_result = self.uni_agent.perform_visualization(self.desc_result, self.column_name, validation_feedback)
 
         except Exception as e:
@@ -173,10 +173,10 @@ class UniCritique:
                 validation_feedback = response.text.strip()
 
                 if "TRUE" in validation_feedback.upper():
-                    print("\nUnivariate Inferential Result Validated")
+                    # print("\nUnivariate Inferential Result Validated")
                     return
                 else:
-                    print("Univariate Inferential Result Not Validated")
+                    # print("Univariate Inferential Result Not Validated")
                     self.infer_result = self.uni_agent.perform_inferential_stats(self.data_column, self.desc_result, self.metadata, validation_feedback)
 
         except Exception as e:

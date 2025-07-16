@@ -38,7 +38,7 @@ class QueryAgent:
 
         retrieved_chunks = [self.texts[i] for i in I[0]]
         context = "\n\n".join(retrieved_chunks)
-        print("contex: ", context)
+        # print("contex: ", context)
 
         prompt = f"""Answer the question based on the following statistical analysis context:
 

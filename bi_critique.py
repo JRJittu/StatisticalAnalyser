@@ -86,10 +86,10 @@ class BiCritique:
                 validation_feedback = response.text.strip()
 
                 if "TRUE" in validation_feedback.upper():
-                    print("\nBivariate Descriptive Result Validated")
+                    # print("\nBivariate Descriptive Result Validated")
                     return
                 else:
-                    print("Bivariate Descriptive Result Not Validated")
+                    # print("Bivariate Descriptive Result Not Validated")
                     self.desc_result = self.bi_agent.perform_descriptive_stats(
                         self.data_column1, self.metadata1, self.data_column2, self.metadata2, validation_feedback
                     )
@@ -135,10 +135,10 @@ class BiCritique:
                 validation_feedback = response.text.strip()
 
                 if "TRUE" in validation_feedback.upper():
-                    print("\nBivariate Visualization Result Validated")
+                    # print("\nBivariate Visualization Result Validated")
                     return
                 else:
-                    print("Bivariate Visualization Result Not Validated")
+                    # print("Bivariate Visualization Result Not Validated")
                     self.visual_result = self.bi_agent.perform_visualization(
                         self.data_column1, self.column_name1, self.data_column2, self.column_name2, self.desc_result, validation_feedback
                     )
@@ -190,10 +190,10 @@ class BiCritique:
                 validation_feedback = response.text.strip()
 
                 if "TRUE" in validation_feedback.upper():
-                    print("\nBivariate Inferential Result Validated")
+                    # print("\nBivariate Inferential Result Validated")
                     return
                 else:
-                    print("Bivariate Inferential Result Not Validated")                    
+                    # print("Bivariate Inferential Result Not Validated")                    
                     self.infer_result = self.bi_agent.perform_inferential_stats(self.data_column1, self.metadata1, self.data_column2, self.metadata2, self.desc_result, validation_feedback)
 
         except Exception as e:

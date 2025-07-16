@@ -1,0 +1,612 @@
+{
+  "preprocessing": {
+    "outlier_result": {
+      "sepal_length": {
+        "selected_method": "IQR (Interquartile Range)",
+        "reasoning": "Although the Shapiro-Wilk test p-value (0.01) suggests a deviation from normality at a 0.05 significance level, the skewness (0.31) is relatively low, and the kurtosis (-0.57) indicates lighter tails than a normal distribution. While the Z-score might be considered, the IQR method is chosen due to its robustness and effectiveness with potentially non-normal data, which aligns well with the prior test results. The Modified Z-score is also a strong contender; however, given the slightly lower complexity and ease of interpretation, IQR is preferred in this scenario.",
+        "outlier_indexes": []
+      },
+      "sepal_width": {
+        "selected_method": "Z-Score",
+        "reasoning": "The Shapiro-Wilk test yielded a p-value of 0.075, which is greater than 0.05, suggesting that the data is approximately normally distributed. Additionally, the skewness (0.33) and kurtosis (0.24) values are relatively low, indicating that the distribution is close to normal. Therefore, the Z-score method, which is designed for approximately normally distributed data, is suitable for this dataset.",
+        "outlier_indexes": [
+          15
+        ]
+      },
+      "petal_length": {
+        "selected_method": "IQR (Interquartile Range)",
+        "reasoning": "The Shapiro-Wilk test p-value (7.545419569615864e-10) is very small, indicating that the data is not normally distributed. The skewness (-0.2717119501716388) is moderate. Given the non-normal distribution and the availability of robust methods, the IQR method is the most appropriate choice for outlier detection in this scenario. Modified Z-score would also be appropriate, but IQR is simpler to apply.",
+        "outlier_indexes": []
+      },
+      "petal_width": {
+        "selected_method": "IQR (Interquartile Range)",
+        "reasoning": "While the Shapiro-Wilk test p-value is very low, suggesting the data is not normally distributed, the skewness is relatively low (-0.1039) and the kurtosis is also low (-1.3352). Given the lower skewness and kurtosis the data is not heavily skewed. The IQR method is a robust method that does not assume any distribution and is a better choice than Z-Score or Modified Z-Score in this case given the data is likely not normally distributed. If the data were heavily skewed, Modified Z-Score would be a better choice than IQR.",
+        "outlier_indexes": []
+      },
+      "species": {
+        "selected_method": "Frequency Analysis",
+        "reasoning": "Given the categorical nominal data type and the provided metadata for the 'Species' column, Frequency Analysis is the most appropriate method. The 'category_distribution' shows the proportion of each category, and 'total_unique_categories' indicates the number of unique categories. Frequency analysis can identify if any species has an unusually low frequency, which might suggest an outlier or data entry error. Although the prior test results show a balanced distribution in this case, Frequency Analysis is still the suitable method because it directly addresses the risk of rare categories, as defined in the 'when_to_use' field. Cardinality check is more useful when category names contain errors, which is not the priority in this scenario.",
+        "outlier_indexes": []
+      }
+    },
+    "distribution_result": {
+      "sepal_length": {
+        "result": "Same",
+        "reason": "KS test p-value = 1.0000"
+      },
+      "sepal_width": {
+        "result": "Same",
+        "reason": "KS test p-value = 1.0000"
+      },
+      "petal_length": {
+        "result": "Same",
+        "reason": "KS test p-value = 1.0000"
+      },
+      "petal_width": {
+        "result": "Same",
+        "reason": "KS test p-value = 1.0000"
+      },
+      "species": {
+        "result": "Same",
+        "reason": "Chi-square test p-value = 1.0000"
+      }
+    }
+  },
+  "univariate": {
+    "descriptive": {
+      "sepal_length": {
+        "statistics_results": {
+          "Shapiro-Wilk test": {
+            "result_value": 0.010181161454691156,
+            "result_text": "The Shapiro-Wilk test statistic is 0.0102, indicating a violation of normality.",
+            "preferred": false,
+            "reason": "While normality testing is valuable, the selection criteria focus on skewness and outlier detection to guide the choice between mean/SD and median/IQR, making Shapiro-Wilk less directly relevant for this specific decision."
+          },
+          "Skewness": {
+            "result_value": 0.3149109566369728,
+            "result_text": "The skewness is 0.315, indicating a slightly right-skewed distribution.",
+            "preferred": true,
+            "reason": "Skewness is directly used in selection criteria to decide between mean/SD and median/IQR. The value falls within the -0.5 to 0.5 range."
+          },
+          "Kurtosis": {
+            "result_value": -0.5520640413156395,
+            "result_text": "The kurtosis is -0.552, indicating a platykurtic distribution (flatter tails than normal).",
+            "preferred": false,
+            "reason": "Kurtosis is calculated as requested, but the selection criteria prioritize skewness and outlier detection.  Therefore, it's less critical for the immediate decision-making process."
+          },
+          "Range": {
+            "result_value": 3.6000000000000005,
+            "result_text": "The range of the data is 3.6.",
+            "preferred": true,
+            "reason": "Range is calculated as it helps in understanding the spread of the data, which is specified as a selection criteria to assess the data, even though it does not affect the decision between using Mean/SD or Median/IQR."
+          },
+          "Outlier Detection (IQR)": {
+            "result_value": 0,
+            "result_text": "No outliers were detected using the IQR method.",
+            "preferred": true,
+            "reason": "Outlier detection is a key component of the selection criteria. The absence of detected outliers influences the choice between mean/SD and median/IQR."
+          },
+          "Outlier Detection (Z-score)": {
+            "result_value": 0,
+            "result_text": "No outliers were detected using the Z-score method.",
+            "preferred": true,
+            "reason": "Outlier detection is a key component of the selection criteria. The absence of detected outliers influences the choice between mean/SD and median/IQR."
+          },
+          "Mean": {
+            "result_value": 5.843333333333334,
+            "result_text": "The average sepal length is 5.843.",
+            "preferred": true,
+            "reason": "Since skewness is between -0.5 and 0.5, the mean is the preferred measure of central tendency."
+          },
+          "Standard Deviation": {
+            "result_value": 0.828066127977863,
+            "result_text": "The standard deviation of sepal length is 0.828.",
+            "preferred": true,
+            "reason": "Since skewness is between -0.5 and 0.5, the standard deviation is the preferred measure of dispersion."
+          },
+          "Median": {
+            "result_value": 5.8,
+            "result_text": "The middle value of the sepal length is 5.8.",
+            "preferred": false,
+            "reason": "Because the skewness falls within the -0.5 to 0.5 range, and no outliers were detected, the median is not the preferred measure of central tendency."
+          },
+          "IQR": {
+            "result_value": 1.3000000000000007,
+            "result_text": "The interquartile range of the sepal length is 1.3.",
+            "preferred": false,
+            "reason": "Because the skewness falls within the -0.5 to 0.5 range, and no outliers were detected, the IQR is not the preferred measure of dispersion."
+          },
+          "Mode": {
+            "result_value": [
+              5.0
+            ],
+            "result_text": "The most frequent sepal length is 5.0.",
+            "preferred": true,
+            "reason": "Mode is always calculated to identify the most frequent value, regardless of skewness or outliers."
+          }
+        }
+      },
+      "sepal_width": {
+        "statistics_results": {
+          "mean": {
+            "result_value": 3.054,
+            "result_text": "The average sepal width is 3.054 units.",
+            "preferred": true,
+            "reason": "The skewness (0.33) is between -0.5 and 0.5, indicating a relatively symmetric distribution, making the mean a suitable measure of central tendency."
+          },
+          "median": {
+            "result_value": 3.0,
+            "result_text": "The middle value of sepal width is 3.0 units.",
+            "preferred": false,
+            "reason": "Although the median is provided, the mean is preferred due to the approximate symmetry of the data (skewness between -0.5 and 0.5)."
+          },
+          "mode": {
+            "result_value": [
+              3.0
+            ],
+            "result_text": "The most frequent sepal width is 3.0 units.",
+            "preferred": true,
+            "reason": "The mode identifies the most common value, providing insight into the distribution's shape, and should always be considered."
+          },
+          "standard_deviation": {
+            "result_value": 0.4335943113621737,
+            "result_text": "The typical deviation from the average sepal width is 0.434 units.",
+            "preferred": true,
+            "reason": "Given the approximate symmetry (skewness between -0.5 and 0.5), standard deviation is a suitable measure of dispersion around the mean."
+          },
+          "IQR": {
+            "result_value": 0.5,
+            "result_text": "The range containing the central 50% of the sepal width data is 0.5 units.",
+            "preferred": false,
+            "reason": "While the IQR is informative, the standard deviation is preferred for measuring spread because the data is approximately symmetrical based on the skewness value. The IQR is more appropriate when data is skewed, or outliers are present."
+          },
+          "skewness": {
+            "result_value": 0.3340526621720866,
+            "result_text": "The distribution of sepal width is slightly skewed to the right.",
+            "preferred": true,
+            "reason": "Skewness is essential for determining the symmetry of data. Here, the value of 0.33 indicates approximate symmetry, guiding the choice of mean and standard deviation over median and IQR."
+          },
+          "kurtosis": {
+            "result_value": 0.2907810623654279,
+            "result_text": "The distribution has slightly lighter tails than a normal distribution.",
+            "preferred": true,
+            "reason": "Kurtosis describes the tail behavior and peakedness of the data and is important for understanding overall distribution."
+          },
+          "range": {
+            "result_value": 2.4000000000000004,
+            "result_text": "The difference between the maximum and minimum sepal width is 2.4 units.",
+            "preferred": false,
+            "reason": "The range provides a basic measure of spread but is sensitive to outliers, making it less robust than standard deviation or IQR. Therefore, standard deviation is preferred as the data is approximately symmetrical."
+          },
+          "outlier_detection_iqr": {
+            "result_value": [
+              4.4,
+              4.1,
+              4.2,
+              2.0
+            ],
+            "result_text": "Potential outliers detected are 4.4, 4.1, 4.2 and 2.0.",
+            "preferred": false,
+            "reason": "While outliers are detected, skewness is between -0.5 and 0.5 so prefered mean and standard deviation"
+          },
+          "outlier_detection_zscore": {
+            "result_value": [
+              4.4
+            ],
+            "result_text": "Potential outlier detected is 4.4.",
+            "preferred": false,
+            "reason": "While outliers are detected, skewness is between -0.5 and 0.5 so prefered mean and standard deviation"
+          }
+        }
+      },
+      "petal_length": {
+        "status": "error",
+        "message": "Error in perform_descriptive_stats: name 'stats' is not defined",
+        "data": null
+      },
+      "petal_width": {
+        "statistics_results": {
+          "Mean": {
+            "result_value": 1.1986666666666668,
+            "result_text": "The average petal width is approximately 1.2 units.",
+            "preferred": true,
+            "reason": "The skewness is -0.104, which falls within the range of -0.5 to 0.5, indicating a symmetric distribution, making the mean a suitable measure of central tendency."
+          },
+          "Standard Deviation": {
+            "result_value": 0.7631607417008411,
+            "result_text": "The typical deviation of petal widths from the mean is approximately 0.76 units.",
+            "preferred": true,
+            "reason": "Since the distribution is approximately symmetric (skewness between -0.5 and 0.5), standard deviation is an appropriate measure of spread."
+          },
+          "Median": {
+            "result_value": 1.3,
+            "result_text": "The middle value of the petal widths is 1.3 units.",
+            "preferred": false,
+            "reason": "While the median provides a measure of central tendency, it's less preferred than the mean in this case because the data is approximately symmetric and there are no detected outliers. Mean is more appropriate for a symmetric distribution."
+          },
+          "IQR": {
+            "result_value": 1.5,
+            "result_text": "The interquartile range, representing the spread of the middle 50% of the data, is 1.5 units.",
+            "preferred": false,
+            "reason": "IQR is less preferred than the standard deviation because the data is approximately symmetric and no outliers were detected. Standard deviation better reflects the spread in a symmetric distribution."
+          },
+          "Mode": {
+            "result_value": [
+              0.2
+            ],
+            "result_text": "The most frequently occurring petal width is 0.2 units.",
+            "preferred": true,
+            "reason": "The mode identifies the most frequent value and is always a valuable descriptive statistic, regardless of the distribution's shape. It's especially useful if there are multiple modes which is not the case here."
+          },
+          "Skewness": {
+            "result_value": -0.10499656214412734,
+            "result_text": "The distribution is slightly skewed to the left.",
+            "preferred": true,
+            "reason": "Skewness is essential to assess the symmetry of the data which informs the choice between mean/standard deviation and median/IQR. It's also an excellent way to understand the petal width of the Hibiscus flower."
+          },
+          "Kurtosis": {
+            "result_value": -1.3397541711393433,
+            "result_text": "The distribution is platykurtic (flatter tails than a normal distribution).",
+            "preferred": true,
+            "reason": "Kurtosis provides insight into the tail behavior of the distribution, complementing the skewness information. While not directly used to select mean/median, it provides valuable context about the shape of the petal widths."
+          },
+          "Range": {
+            "result_value": 2.4,
+            "result_text": "The difference between the maximum and minimum petal width is 2.4 units.",
+            "preferred": true,
+            "reason": "The range provides a simple measure of the overall spread of the data, though less informative than standard deviation or IQR when assessing distribution properties. It indicates the total distance of the data."
+          },
+          "Outlier Detection (via IQR)": {
+            "result_value": [],
+            "result_text": "No outliers were detected using the IQR method.",
+            "preferred": true,
+            "reason": "Important for determining if robust measures are needed. Confirms that mean and standard deviation are suitable."
+          },
+          "Outlier Detection (via Z-score)": {
+            "result_value": [],
+            "result_text": "No outliers were detected using the Z-score method.",
+            "preferred": true,
+            "reason": "Important for determining if robust measures are needed. Confirms that mean and standard deviation are suitable."
+          },
+          "Shapiro-Wilk test": {
+            "result_value": 1.8647596517271003e-08,
+            "result_text": "The data does not follow a normal distribution.",
+            "preferred": false,
+            "reason": "The Shapiro-Wilk test indicates the data is not normally distributed. However, given the modest sample size and application criteria focusing on skewness, the preference for mean and standard deviation is still maintained because the skewness is in range. In general, Shapiro-Wilk is better for small samples."
+          }
+        }
+      },
+      "species": {
+        "statistics_results": {
+          "frequency": {
+            "result_value": {
+              "Iris-setosa": 50,
+              "Iris-versicolor": 50,
+              "Iris-virginica": 50
+            },
+            "result_text": "Each species (Iris-setosa, Iris-versicolor, and Iris-virginica) appears 50 times in the dataset.",
+            "preferred": true,
+            "reason": "Frequency counts are fundamental for understanding the distribution of categorical variables and are explicitly required by the application criteria."
+          },
+          "proportion": {
+            "result_value": {
+              "Iris-setosa": 0.3333333333333333,
+              "Iris-versicolor": 0.3333333333333333,
+              "Iris-virginica": 0.3333333333333333
+            },
+            "result_text": "Each species represents approximately 33.33% of the total dataset.",
+            "preferred": true,
+            "reason": "Proportions provide a standardized view of the categorical distribution, allowing for easy comparison. The application criteria specifically demands calculation of proportions."
+          },
+          "mode": {
+            "result_value": [
+              "Iris-setosa",
+              "Iris-versicolor",
+              "Iris-virginica"
+            ],
+            "result_text": "All three species (Iris-setosa, Iris-versicolor, and Iris-virginica) are modes, as they each occur with the same highest frequency.",
+            "preferred": true,
+            "reason": "Identifying the mode is specified in the application criteria to determine the most frequent category, and in this case, all categories are equally frequent."
+          },
+          "Chi-square Goodness of Fit": {
+            "result_value": {
+              "statistic": 0.0,
+              "p_value": 1.0
+            },
+            "result_text": "The Chi-square goodness of fit test indicates that the observed frequencies do not significantly differ from the expected frequencies (assuming equal distribution).",
+            "preferred": false,
+            "reason": "While the Chi-square test confirms equal distribution, the frequency and proportion statistics are more directly informative for describing the distribution, as per the selection and application criteria. This test is not as crucial as direct descriptive metrics of the frequency."
+          },
+          "Proportion Analysis": {
+            "result_value": {
+              "statistic": 0.0,
+              "p_value": 1.0
+            },
+            "result_text": "The proportion analysis confirms that there is no significant difference between the proportions of each category.",
+            "preferred": false,
+            "reason": "Similar to the Chi-square test, this confirms the equal distribution, but frequency and proportions are the core values to report. Proportion analysis provides a redundant assessment compared to simply reporting the calculated proportions. Also there are no additional information on how this proportion analysis calculated."
+          },
+          "Expected Frequency Check": {
+            "result_value": [
+              50.0,
+              50.0,
+              50.0
+            ],
+            "result_text": "The expected frequencies for each category are all 50, indicating an equal distribution.",
+            "preferred": false,
+            "reason": "This test only repeats the result in `frequency` so is redundant."
+          }
+        }
+      }
+    },
+    "visual": {
+      "sepal_length": {
+        "visualization_1": {
+          "name": "Histogram",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.hist(data_column, bins=12, edgecolor='black')\nplt.title('Distribution of sepal_length')\nplt.xlabel('sepal_length (cm)')\nplt.ylabel('Frequency')\nplt.xlim(4, 8)\nplt.grid(True)\nplt.savefig('uploads/sepal_length_vis1.png')\nplt.close()\n",
+          "reason": "The skewness is 0.315, indicating a nearly symmetric distribution. Also, no outliers were detected. Therefore, a histogram is suitable for visualizing the distribution of the sepal_length data because the distribution is approximately symmetric and the sample size is adequately large to give more accurate distribution."
+        },
+        "visualization_2": {
+          "name": "Box Plot",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.boxplot(data_column, vert=False, patch_artist=True)\nplt.title('Box Plot of sepal_length')\nplt.xlabel('sepal_length (cm)')\nplt.grid(True)\nplt.savefig('uploads/sepal_length_vis2.png')\nplt.close()\n",
+          "reason": "Because no outliers were detected by IQR or Z-score methods, and the skewness is 0.315, which indicates that data is not skewed too much, the box plot is a good choice. Although the histogram is preferred because skewness is small, boxplot provides a different view of the distribution and confirms no outliers are present."
+        }
+      },
+      "sepal_width": {
+        "visualization_1": {
+          "name": "Histogram",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.hist(data_column, bins=8, edgecolor='black')\nplt.title('Distribution of Sepal Width')\nplt.xlabel('Sepal Width (cm)')\nplt.ylabel('Frequency')\nplt.xlim(1.9, 4.5)\nplt.grid(axis='y', alpha=0.75)\nplt.savefig('uploads/sepal_width_vis1.png')\nplt.close()",
+          "reason": "The skewness (0.33) is low, indicating a relatively symmetric distribution. A histogram is suitable for visualizing the frequency distribution of sepal width, allowing us to observe the shape and central tendency of the data. The bins size is 8 based on the data range."
+        },
+        "visualization_2": {
+          "name": "Box Plot",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.boxplot(data_column, vert=False, patch_artist=True)\nplt.title('Box Plot of Sepal Width')\nplt.xlabel('Sepal Width (cm)')\nplt.savefig('uploads/sepal_width_vis2.png')\nplt.close()",
+          "reason": "A box plot is suitable because it helps identify potential outliers, which were detected in the data (4.4, 4.1, 4.2, 2.0). It also provides a visual representation of the median, quartiles, and range, offering a comprehensive view of the data's spread and central tendency, despite the approximate symmetry."
+        }
+      },
+      "petal_length": {
+        "visualization_1": {
+          "name": "Box Plot",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.boxplot(data_column, vert=False)\nplt.xlabel('petal_length')\nplt.title('Box Plot of petal_length')\nplt.xlim(0, 7)\nplt.savefig('uploads/petal_length_vis1.png')\nplt.close()",
+          "reason": "A box plot is suitable because the data may contain outliers and the mean and median (50%) values are noticeably different (3.76 and 4.35 respectively), suggesting potential skewness. A box plot will effectively visualize the spread, quartiles, and any potential outliers in the 'petal_length' data."
+        },
+        "visualization_2": {
+          "name": "Histogram",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.hist(data_column, bins=6, range=(1, 7))\nplt.xlabel('petal_length')\nplt.ylabel('Frequency')\nplt.title('Histogram of petal_length')\nplt.xlim(1, 7)\nplt.savefig('uploads/petal_length_vis2.png')\nplt.close()",
+          "reason": "Given the count of 150, a histogram is a good choice to visualize the distribution of the 'petal_length' data. The histogram will show the frequency of petal lengths within different bins, providing insights into the shape and central tendency of the data. I have set bins equals to 6 using range from 1 to 7 to better visualize the given data."
+        }
+      },
+      "petal_width": {
+        "visualization_1": {
+          "name": "Histogram",
+          "python_code": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 6))\nplt.hist(data_column, bins=8, edgecolor='black')\nplt.title('Histogram of petal_width')\nplt.xlabel('petal_width')\nplt.ylabel('Frequency')\nplt.xlim(0, 2.6)\nplt.ylim(0, 50)\nplt.grid(True)\nplt.savefig('uploads/petal_width_vis1.png')\nplt.close()",
+          "reason": "The skewness is -0.104, indicating an approximately symmetric distribution. There are no outliers detected. Therefore, a histogram is appropriate for visualizing the distribution of petal widths. The bins were set to 8 to appropriately display the distribution across the observed range, given the range of the data (0.1 to 2.5)"
+        },
+        "visualization_2": {
+          "name": "Q-Q Plot",
+          "python_code": "import matplotlib.pyplot as plt\nimport scipy.stats as stats\nimport numpy as np\n\nplt.figure(figsize=(8, 6))\nstats.probplot(data_column, dist=\"norm\", plot=plt)\nplt.title('Q-Q Plot of petal_width')\nplt.savefig('uploads/petal_width_vis2.png')\nplt.close()",
+          "reason": "Given the kurtosis value of -1.339 and the results of Shapiro-Wilk test indicating that the data does not follow a normal distribution, a Q-Q plot helps visually assess the departure from normality. This visualization complements the histogram by focusing on the normality assumption."
+        }
+      },
+      "species": {
+        "visualization_1": {
+          "name": "Bar Chart",
+          "python_code": "import matplotlib.pyplot as plt\nimport pandas as pd\n\ncounts = data_column.value_counts()\nplt.figure(figsize=(8, 6))\ncounts.plot(kind='bar')\nplt.title('Frequency of Each Species')\nplt.xlabel('Species')\nplt.ylabel('Frequency')\nplt.xticks(rotation=45)\nplt.tight_layout()\nplt.savefig('uploads/species_vis1.png')",
+          "reason": "A bar chart is ideal for visualizing the frequency of each species (Iris-setosa, Iris-versicolor, and Iris-virginica). The descriptive statistics show that we have frequency counts for each species, and a bar chart effectively compares these counts across the categories. This aligns perfectly with the application criteria for bar charts."
+        },
+        "visualization_2": {
+          "name": "Pie Chart",
+          "python_code": "import matplotlib.pyplot as plt\nimport pandas as pd\n\ncounts = data_column.value_counts()\nplt.figure(figsize=(6, 6))\nplt.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=90)\nplt.title('Proportion of Each Species')\nplt.tight_layout()\nplt.savefig('uploads/species_vis2.png')",
+          "reason": "A pie chart is suitable for displaying the proportional breakdown of the species. The descriptive statistics provide the proportions of each species, and since there are only three categories, a pie chart effectively visualizes how each species contributes to the whole dataset. This adheres to the application criteria that pie charts are best when the number of categories is small (<=5)."
+        }
+      }
+    },
+    "inferential": {
+      "sepal_length": {
+        "one_sample_z_test": {
+          "hypothesis": "H\u2080: The population mean sepal length is equal to a specified value (\u03bc\u2080). H\u2081: The population mean sepal length is not equal to \u03bc\u2080.",
+          "reason": "The Shapiro-Wilk test p-value (0.0102) is less than 0.05, indicating the data is not normally distributed. However, given that the sample size is greater than or equal to 30, and based on the instructions, a one-sample z-test should be conducted if the Shapiro-Wilk test is not significant and sample size is >=30 or the population standard deviation is known.",
+          "result": {
+            "test_statistic": 86.42537461721703,
+            "pvalue": 0.0
+          },
+          "conclusion": "The p-value is 0.0, which is less than the significance level of 0.05. Therefore, we reject the null hypothesis and conclude that the population mean sepal length is significantly different from the specified value."
+        },
+        "confidence_interval": {
+          "hypothesis": "Estimate the range within which the true population mean sepal length is likely to fall with a certain level of confidence.",
+          "reason": "Confidence intervals can be used regardless of normality. Although the Shapiro-Wilk test indicated non-normality, and it's recommended to interpret cautiously, calculating a confidence interval is still appropriate based on the instructions.",
+          "result": {
+            "lower_bound": 5.710178562391521,
+            "upper_bound": 5.9764881042751465,
+            "confidence_level": 0.95
+          },
+          "conclusion": "We are 95% confident that the true population mean sepal length falls between 5.71 and 5.98."
+        }
+      },
+      "sepal_width": {
+        "status": "error",
+        "message": "Error in perform_inferential_stats: module 'scipy.stats' has no attribute 'ztest'",
+        "data": null
+      },
+      "petal_length": {
+        "shapiro_wilk_test": {
+          "hypothesis": "H\u2080: The petal length data are normally distributed.\nH\u2081: The petal length data are not normally distributed.",
+          "reason": "Step 2: Shapiro-Wilk test is required to assess normality before proceeding with parametric tests.",
+          "result": [
+            0.8764246351886722,
+            7.545419569615864e-10
+          ],
+          "conclusion": "The Shapiro-Wilk test indicates that the petal length data are not normally distributed (p < 0.001)."
+        },
+        "confidence_interval": {
+          "hypothesis": "Estimate the population mean petal length with a certain level of confidence.",
+          "reason": "Confidence intervals are useful for estimating the population mean petal length, regardless of the data's normality. However, the result has to be interpreted with caution due to error in descriptive stats.",
+          "result": {
+            "lower_bound": 3.4749441607871825,
+            "upper_bound": 4.04238917254615,
+            "confidence_level": 0.95
+          },
+          "conclusion": "We are 95% confident that the true population mean petal length lies between 3.47 and 4.04. However, this result should be interpreted cautiously due to a possible error in descriptive stats."
+        }
+      },
+      "petal_width": {
+        "one-sample t-test": {
+          "hypothesis": "H\u2080: The population mean petal width of Hibiscus flowers is equal to a pre-defined value, \u03bc\u2080.  H\u2081: The population mean petal width of Hibiscus flowers is not equal to \u03bc\u2080.",
+          "reason": "The sample size is less than 30. The Shapiro-Wilk test indicates non-normality (p-value <= 0.05), but the skewness is between -0.5 and 0.5, so the t-test is appropriate. Population standard deviation is unknown.",
+          "result": {
+            "statistic": 3.1882664794075883,
+            "pvalue": 0.0017445980491395767
+          },
+          "conclusion": "The p-value (0.00174) is less than the significance level of 0.05. Therefore, we reject the null hypothesis and conclude that the population mean petal width of Hibiscus flowers is significantly different from the pre-defined value, \u03bc0."
+        },
+        "confidence interval": {
+          "hypothesis": "Estimate the range within which the true population mean petal width of Hibiscus flowers lies with a certain level of confidence.",
+          "reason": "Confidence intervals can be used regardless of normality. This provides a range for the true population mean, which is useful even with slight non-normality given the skewness is low. It provides additional information.",
+          "result": {
+            "lower_bound": 1.075537701809291,
+            "upper_bound": 1.3217956315240424,
+            "confidence_level": 0.95
+          },
+          "conclusion": "We are 95% confident that the true population mean petal width of Hibiscus flowers lies between 1.076 and 1.322."
+        }
+      },
+      "species": {
+        "status": "error",
+        "message": "Error in perform_inferential_stats: 'Species'",
+        "data": null
+      }
+    }
+  },
+  "bivariate": {
+    "descriptive": {
+      "petal_length-petal_width": {
+        "statistics_results": {
+          "Pearson Correlation": {
+            "result_value": 0.9627570970509661,
+            "result_text": "The petal length and petal width have a very strong positive correlation.",
+            "preferred": true,
+            "reason": "The correlation coefficient effectively quantifies the strong, linear relationship observed between petal length and width, as suggested by the selection criteria."
+          },
+          "Regression Analysis (R-squared)": {
+            "result_value": 0.927,
+            "result_text": "Petal length explains 92.7% of the variability in petal width.",
+            "preferred": true,
+            "reason": "R-squared explains the variance of the dependent variable which is critical in predictive modeling of petal width based on petal length."
+          },
+          "Regression Analysis (Slope)": {
+            "result_value": 0.4164,
+            "result_text": "For every one unit increase in petal length, petal width is expected to increase by 0.4164 units.",
+            "preferred": true,
+            "reason": "The slope estimates the predictive relationship between petal length and petal width."
+          },
+          "Regression Analysis (Intercept)": {
+            "result_value": -0.3665,
+            "result_text": "When petal length is zero, the predicted petal width is -0.3665 units.",
+            "preferred": true,
+            "reason": "The intercept is crucial to predicting petal width from petal length in the regression model."
+          },
+          "Linearity Assessment (Rainbow Test)": {
+            "result_value": 0.00023038717004784977,
+            "result_text": "There is significant non-linearity.",
+            "preferred": false,
+            "reason": "A low p-value from the Rainbow Test suggests that the linearity assumption of the regression model may be violated, and the model fit could be improved by including non-linear terms."
+          },
+          "Regression Assumptions Check (LM Test)": {
+            "result_value": 9.700115954226686e-08,
+            "result_text": "There is evidence of heteroscedasticity.",
+            "preferred": false,
+            "reason": "The LM Test strongly suggests heteroscedasticity, which violates a key assumption of linear regression, potentially leading to biased standard errors."
+          },
+          "Assumption Testing (Jarque-Bera)": {
+            "result_value": 0.07362807934044778,
+            "result_text": "The residuals are normally distributed.",
+            "preferred": true,
+            "reason": "The residuals are approximately normally distributed, validating an important assumption of linear regression."
+          },
+          "Covariance": {
+            "result_value": 1.296387472035794,
+            "result_text": "Petal length and petal width tend to increase together.",
+            "preferred": true,
+            "reason": "Covariance provides insight into how petal length and petal width vary together."
+          }
+        }
+      },
+      "petal_length-species": {
+        "status": "error",
+        "message": "Error in perform_descriptive_stats: Could not convert string 'Iris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginica' to numeric",
+        "data": null
+      },
+      "sepal_length-species": {
+        "status": "error",
+        "message": "Error in perform_descriptive_stats: Could not convert string 'Iris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-setosaIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-versicolorIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginicaIris-virginica' to numeric",
+        "data": null
+      }
+    },
+    "visual": {
+      "petal_length-petal_width": {
+        "status": "error",
+        "message": "Error in perform_visualization: [Errno 2] No such file or directory: 'uploads/bi_Petal Length: Numerical, continuous data representing the length of the petal in a hibiscus flower.  Measured in a consistent unit (e.g., centimeters or millimeters).  A key feature for species identification and understanding floral development._Petal Width: Numerical, continuous data representing the width of the petal in a hibiscus flower. Measured in a consistent unit (e.g., centimeters or millimeters).  Works in conjunction with petal length to define petal shape and contribute to species classification._vis1.png'",
+        "data": null
+      },
+      "petal_length-species": {
+        "status": "error",
+        "message": "Error in perform_visualization: Invalid \\escape: line 4 column 797 (char 863)",
+        "data": null
+      },
+      "sepal_length-species": {
+        "status": "error",
+        "message": "Error in perform_visualization: Invalid \\escape: line 4 column 925 (char 991)",
+        "data": null
+      }
+    },
+    "inferential": {
+      "petal_length-petal_width": {
+        "status": "error",
+        "message": "Error in perform_inferential_stats: Object of type ndarray is not JSON serializable",
+        "data": null
+      },
+      "petal_length-species": {
+        "Mann-Whitney U test": {
+          "hypothesis": "H\u2080: There is no difference in the distribution of petal_length between different species. H\u2081: There is a difference in the distribution of petal_length between different species.",
+          "reason": "The descriptive statistics returned an error, indicating that the data for 'species' could not be converted to numeric. This suggests that 'species' contains categorical data and/or the 'petal_length' data might not be normally distributed, thus the Mann-Whitney U test is selected as the non-parametric alternative. In this situation, we use the Mann-Whitney U test to compare each pair of species.",
+          "result": {
+            "Iris-setosa_vs_Iris-versicolor": {
+              "statistic": 0.0,
+              "pvalue": 5.634269830542845e-18
+            },
+            "Iris-setosa_vs_Iris-virginica": {
+              "statistic": 0.0,
+              "pvalue": 5.648432865733372e-18
+            },
+            "Iris-versicolor_vs_Iris-virginica": {
+              "statistic": 44.5,
+              "pvalue": 9.133544727668259e-17
+            }
+          },
+          "conclusion": "The petal length distributions are significantly different between all pairs of Iris species (Iris-setosa vs. Iris-versicolor, Iris-setosa vs. Iris-virginica, and Iris-versicolor vs. Iris-virginica)."
+        }
+      },
+      "sepal_length-species": {
+        "Mann-Whitney U test": {
+          "hypothesis": "H\u2080: The distribution of sepal_length is the same across different species.\nH\u2081: The distribution of sepal_length is different across different species.",
+          "reason": "Descriptive statistics indicate an error converting species to numerical values, suggesting that the normality assumption likely fails. Given the violation of normality, the Mann-Whitney U test is the appropriate non-parametric alternative to compare sepal lengths across different species.",
+          "result": {
+            "comparison_0_1": {
+              "test_statistic": 168.5,
+              "p_value": 8.34582714594069e-14
+            },
+            "comparison_0_2": {
+              "test_statistic": 38.5,
+              "p_value": 6.396699069396538e-17
+            },
+            "comparison_1_2": {
+              "test_statistic": 526.0,
+              "p_value": 5.869006410664197e-07
+            }
+          },
+          "conclusion": "The Mann-Whitney U test results indicate that there are statistically significant differences in sepal length between all pairs of species (species 0 and 1, species 0 and 2, and species 1 and 2). The extremely low p-values for each comparison provide strong evidence to reject the null hypothesis that the distributions of sepal lengths are the same across different species."
+        }
+      }
+    }
+  }
+}
