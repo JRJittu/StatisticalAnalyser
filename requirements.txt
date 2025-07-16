@@ -10,4 +10,4 @@ python-dotenv
 flask
 streamlit
 sentence-transformers
-faiss
+faiss-cpu
